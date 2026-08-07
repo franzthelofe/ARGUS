@@ -20,59 +20,20 @@
             }
           },
           {
-            "id": "0e602c719202cb19",
+            "id": "8bda370acee6ac81",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Modules/Components.md",
+                "file": "Modules/General.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Components"
-            }
-          },
-          {
-            "id": "5179dda992569aa4",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Modules/Components.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Components"
-            }
-          },
-          {
-            "id": "a51bfae40049d1b2",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Modules/Body.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Body"
-            }
-          },
-          {
-            "id": "04010b3e7dd09c84",
-            "type": "leaf",
-            "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Graph view"
+              "title": "General"
             }
           }
-        ],
-        "currentTab": 4
+        ]
       }
     ],
     "direction": "vertical"
@@ -236,12 +197,14 @@
       "graph:Open graph view": false
     }
   },
-  "active": "04010b3e7dd09c84",
+  "active": "87adc00ae9328373",
   "lastOpenFiles": [
-    "Modules/Components.md",
-    "Modules/Head.md",
     "Modules/General.md",
+    "Modules/Components.md",
+    "Modules/TEST.md",
+    "Modules/Head.md",
     "Modules/Body.md",
+    "Questionnare/Inquries.md",
     "Modules",
     "Abstract.md",
     "PGM/esp32h/test/README",
@@ -255,7 +218,6 @@
     "PGM/esp32h/include",
     "PGM/README.md",
     "Questionnare/Who Questions.md",
-    "Questionnare/Inquries.md",
     "Questionnare/Where Questions.md",
     "Questionnare/When Questions.md",
     "Introduction.md",
