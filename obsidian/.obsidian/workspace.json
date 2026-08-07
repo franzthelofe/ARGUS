@@ -1,0 +1,228 @@
+{
+  "main": {
+    "id": "055b6b1223ec0726",
+    "type": "split",
+    "children": [
+      {
+        "id": "a86a3998a78782b0",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "87adc00ae9328373",
+            "type": "leaf",
+            "pinned": true,
+            "state": {
+              "type": "graph",
+              "state": {},
+              "pinned": true,
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
+            }
+          },
+          {
+            "id": "0e602c719202cb19",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
+            }
+          }
+        ],
+        "currentTab": 1
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "54084da87b2b3233",
+    "type": "split",
+    "children": [
+      {
+        "id": "77ddfd612f618364",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "b48077b16d11c233",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "97eca57fb0c72c6c",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "f644942d926338cd",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "191cb4e20a9d4316",
+    "type": "split",
+    "children": [
+      {
+        "id": "767b2de1bde55a78",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "f314458d6260c61c",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks"
+            }
+          },
+          {
+            "id": "e5f7db673580a784",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links"
+            }
+          },
+          {
+            "id": "8afd258106c9b0d9",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "a51d720cee749a36",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "de2fa46acf0c2d8e",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false,
+      "graph:Open graph view": false
+    }
+  },
+  "active": "0e602c719202cb19",
+  "lastOpenFiles": [
+    "PGM/esp32h/test/README",
+    "PGM/esp32h/src/main.cpp",
+    "PGM/esp32h/lib/README",
+    "PGM/esp32h/include/README",
+    "PGM/esp32h/test",
+    "PGM/esp32h/src",
+    "PGM/esp32h/platformio.ini",
+    "PGM/esp32h/lib",
+    "PGM/esp32h/include",
+    "PGM/esp32h",
+    "PGM/esp32m/platformio.ini",
+    "PGM/README.md",
+    "Questionnare/Who Questions.md",
+    "Questionnare/Inquries.md",
+    "Questionnare/Where Questions.md",
+    "Questionnare/When Questions.md",
+    "Introduction.md",
+    "Components.md",
+    "Abstract.md",
+    "Questionnare/How Questions.md",
+    "Questionnare/What Questions.md",
+    "Questionnare/Why Questions.md",
+    "Untitled.canvas",
+    "note.md",
+    "Plan.canvas",
+    "2026-08-04.md",
+    "Untitled 2.canvas",
+    "Untitled 1.canvas"
+  ]
+}
