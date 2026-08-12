@@ -114,8 +114,15 @@ HardwareSerial dbgSerial(DEBUG_RX_PIN, DEBUG_TX_PIN);
 // whatever comes back rather than hard-failing on an unexpected
 // or missing reply.
 // ============================================================
-#define BT_AT_INIT_DELAY_MS 1000   // let the module boot before talking AT to it
-#define BT_AT_TIMEOUT_MS    300    // how long to wait for a reply to each AT command
+#define BT_AT_CONFIG_ENABLED        1    // set to 0 to skip AT setup entirely (pure passthrough).
+                                          // HM-10 settings persist in the module across power
+                                          // cycles, so you typically only need this ON for the
+                                          // first flash/boot -- then flip it off to save ~1-2s
+                                          // of boot time on every boot after that.
+#define BT_AT_INIT_DELAY_MS         1000 // let the module boot before talking AT to it
+#define BT_AT_TIMEOUT_MS            300  // max wait for a reply if the module stays silent
+#define BT_AT_INTERCOMMAND_DELAY_MS 50   // settle time between commands -- some clones miss
+                                          // a command sent right after the previous one
 #define BT_DEVICE_NAME      "ARGUS"
 
 // Optional pairing PIN. Off by default -- turning it on means
@@ -176,7 +183,11 @@ void setup() {
   digitalWrite(LED_PIN, HIGH); // off (active-low)
 
   setupBluetoothStatePin();
+#if BT_AT_CONFIG_ENABLED
   setupBluetoothModule(); // AT-config pass -- blocks for roughly a second or two
+#else
+  dbgSerial.println("[BT] AT-config skipped (BT_AT_CONFIG_ENABLED=0).");
+#endif
 
   dbgSerial.print("[OK] Motors ready. Default speed: ");
   dbgSerial.print(DEFAULT_SPEED_PERCENT);
@@ -251,19 +262,28 @@ void handleCommand(char c) {
 // SECTION: HM-10 AT-command configuration
 // ============================================================
 
-// Sends one AT command and captures whatever comes back within
-// timeoutMs. Returns true if any bytes were received at all.
+// Sends one AT command and captures whatever comes back. Returns
+// early once the module has replied and then gone quiet for
+// REPLY_IDLE_MS, rather than always blocking the full timeoutMs
+// -- across several commands at boot that saves real time.
+// timeoutMs is the fallback if the module never replies at all.
+// Returns true if any bytes were received.
 bool sendATCommand(const char* cmd, char* responseBuf, size_t bufLen,
                     unsigned long timeoutMs) {
   while (btSerial.available()) btSerial.read(); // drop stale bytes first
 
   btSerial.print(cmd);
 
+  const unsigned long REPLY_IDLE_MS = 40;
   size_t idx = 0;
   unsigned long start = millis();
+  unsigned long lastByteMs = start;
   while (millis() - start < timeoutMs && idx < bufLen - 1) {
     if (btSerial.available()) {
       responseBuf[idx++] = (char)btSerial.read();
+      lastByteMs = millis();
+    } else if (idx > 0 && (millis() - lastByteMs) >= REPLY_IDLE_MS) {
+      break; // got a reply and it's gone quiet -- done, no need to wait out the timeout
     }
   }
   responseBuf[idx] = '\0';
@@ -283,24 +303,30 @@ void setupBluetoothModule() {
     dbgSerial.println("[BT] No reply to AT -- module may already be paired, "
                        "or this clone doesn't echo bare AT. Continuing.");
   }
+  delay(BT_AT_INTERCOMMAND_DELAY_MS);
 
   snprintf(cmd, sizeof(cmd), "AT+NAME%s", BT_DEVICE_NAME);
   if (sendATCommand(cmd, resp, sizeof(resp))) {
     dbgSerial.print("[BT] AT+NAME  -> "); dbgSerial.println(resp);
   }
+  delay(BT_AT_INTERCOMMAND_DELAY_MS);
 
   if (sendATCommand("AT+ROLE0", resp, sizeof(resp))) { // 0 = peripheral/slave
     dbgSerial.print("[BT] AT+ROLE0 -> "); dbgSerial.println(resp);
   }
+  delay(BT_AT_INTERCOMMAND_DELAY_MS);
 
 #if BT_REQUIRE_PIN
   snprintf(cmd, sizeof(cmd), "AT+PASS%s", BT_PIN_CODE);
   if (sendATCommand(cmd, resp, sizeof(resp))) {
     dbgSerial.print("[BT] AT+PASS  -> "); dbgSerial.println(resp);
   }
+  delay(BT_AT_INTERCOMMAND_DELAY_MS);
+
   if (sendATCommand("AT+TYPE2", resp, sizeof(resp))) { // 2 = require PIN auth
     dbgSerial.print("[BT] AT+TYPE2 -> "); dbgSerial.println(resp);
   }
+  delay(BT_AT_INTERCOMMAND_DELAY_MS);
 #endif
 
   while (btSerial.available()) btSerial.read(); // clear anything left before the main loop
