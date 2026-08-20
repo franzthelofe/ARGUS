@@ -14,7 +14,11 @@ const int interval = 1000;
 
 void loop()
 {
+<<<<<<< HEAD
   unsigned long curMillis = millis();
+=======
+  unsigned long curMillis = millis(); 
+>>>>>>> body
 
   while (curMillis - prevMillis >= interval)
   {
