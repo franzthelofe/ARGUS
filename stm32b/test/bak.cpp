@@ -209,7 +209,7 @@ void loop() {
 
   // Safety: stop if the link's gone quiet while we were moving.
   if (g_isMoving && (millis() - g_lastCommandMs > COMMAND_TIMEOUT_MS)) {
-    dbgSerial.println("[SAFETY] No command received in time -- stopping.");=
+    dbgSerial.println("[SAFETY] No command received in time -- stopping.");
     stopMotors();
   }
 
