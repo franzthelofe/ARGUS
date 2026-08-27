@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "stm32b"
+		},
+		{
+			"path": "esp32h"
+		}
+	],
+	"settings": {}
+}
