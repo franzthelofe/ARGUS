@@ -270,3 +270,275 @@ and (orientation: landscape) {
     max-width: 100%;
     overflow-wrap: anywhere;
 }
+/* =========================================================
+   ARGUS MOBILE LANDSCAPE
+   ========================================================= */
+
+@media screen and (max-width: 900px) and (orientation: landscape) {
+
+    html,
+    body {
+        width: 100%;
+        min-height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    body {
+        min-width: 0;
+    }
+
+    /* Main controller */
+    .argus-controller {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        padding: 8px;
+    }
+
+    /* =====================================================
+       MAIN TWO-COLUMN LAYOUT
+       ===================================================== */
+
+    .controller-layout {
+        display: grid !important;
+
+        grid-template-columns:
+            minmax(250px, 40%)
+            minmax(0, 60%);
+
+        gap: 8px;
+
+        width: 100%;
+        min-height: calc(100vh - 70px);
+
+        align-items: stretch;
+    }
+
+    /* =====================================================
+       LEFT — MOVEMENT
+       ===================================================== */
+
+    .movement-layout {
+        width: 100%;
+        min-width: 0;
+
+        display: flex;
+        flex-direction: column;
+
+        padding: 12px;
+
+        overflow: hidden;
+    }
+
+    .movement-control {
+        flex: 1;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        min-height: 0;
+    }
+
+    /* =====================================================
+       D-PAD
+       ===================================================== */
+
+    .movement-pad {
+        display: grid !important;
+
+        grid-template-columns:
+            repeat(3, minmax(45px, 70px));
+
+        grid-template-rows:
+            repeat(3, minmax(45px, 70px));
+
+        gap: 6px;
+
+        justify-content: center;
+        align-items: center;
+
+        margin: 10px auto;
+    }
+
+    .movement-pad button {
+        width: 100%;
+        height: 100%;
+
+        min-width: 45px;
+        min-height: 45px;
+
+        touch-action: none;
+
+        user-select: none;
+        -webkit-user-select: none;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* D-pad positions */
+
+    #forwardBtn {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    #leftBtn {
+        grid-column: 1;
+        grid-row: 2;
+    }
+
+    #stopBtn {
+        grid-column: 2;
+        grid-row: 2;
+    }
+
+    #rightBtn {
+        grid-column: 3;
+        grid-row: 2;
+    }
+
+    #reverseBtn {
+        grid-column: 2;
+        grid-row: 3;
+    }
+
+    /* =====================================================
+       SPEED
+       ===================================================== */
+
+    .speed-section {
+        width: 90%;
+        margin: 8px auto;
+    }
+
+    /* =====================================================
+       EMERGENCY STOP
+       ===================================================== */
+
+    .emergency-stop {
+        width: 90%;
+        min-height: 42px;
+
+        margin: 6px auto 0;
+
+        touch-action: manipulation;
+    }
+
+    /* =====================================================
+       RIGHT — FUNCTIONAL AREA
+       ===================================================== */
+
+    .functional-layout {
+        width: 100%;
+        min-width: 0;
+
+        display: flex;
+        flex-direction: column;
+
+        overflow-y: auto;
+        overflow-x: hidden;
+
+        min-height: 0;
+
+        padding: 8px;
+    }
+
+    /* =====================================================
+       SENSOR VIEW
+       ===================================================== */
+
+    .sensor-view {
+        width: 100%;
+
+        min-height: 180px;
+        max-height: 45vh;
+
+        flex-shrink: 0;
+    }
+
+    .sensor-feed {
+        width: 100%;
+        height: 100%;
+
+        min-height: 160px;
+    }
+
+    /* =====================================================
+       CAMERA / THERMAL SWITCH
+       ===================================================== */
+
+    .sensor-switch {
+        display: flex;
+
+        justify-content: center;
+        align-items: center;
+
+        gap: 6px;
+
+        padding: 6px;
+    }
+
+    .sensor-switch button {
+        min-width: 100px;
+        min-height: 38px;
+
+        touch-action: manipulation;
+    }
+
+    /* =====================================================
+       FUNCTION BUTTONS
+       ===================================================== */
+
+    .function-grid {
+        display: grid !important;
+
+        grid-template-columns:
+            repeat(4, minmax(0, 1fr));
+
+        gap: 6px;
+
+        width: 100%;
+
+        margin-top: 8px;
+    }
+
+    .function-card {
+        min-width: 0;
+
+        min-height: 75px;
+
+        padding: 8px;
+
+        display: flex;
+        flex-direction: column;
+
+        justify-content: center;
+        align-items: center;
+
+        text-align: center;
+    }
+
+    /* =====================================================
+       SYSTEM CONSOLE
+       ===================================================== */
+
+    #systemConsole {
+        height: 130px;
+        max-height: 130px;
+
+        flex-shrink: 0;
+
+        overflow-y: auto;
+        overflow-x: hidden;
+
+        overscroll-behavior: contain;
+
+        margin-top: 8px;
+    }
+}
