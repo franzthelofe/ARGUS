@@ -6,6 +6,7 @@
 <title>ARGUS Controller</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="style.css" rel="stylesheet"/>
 <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -178,17 +179,15 @@
 </div>
 </header>
 <!-- Main Workspace -->
-<main class="flex-1 grid grid-cols-1 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] w-full p-4 sm:p-6 gap-6 overflow-visible relative">
+<main
+  class="flex-1 grid grid-cols-1 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] w-full p-4 sm:p-6 gap-6 overflow-visible relative"
 ><!-- Left Panel: Movement (40%) -->
 <section
-  class="w-full
-         landscape:w-[38%]
-         lg:w-[40%]
-         bg-surface-panel panel-border rounded
+  class="min-w-0 bg-surface-panel panel-border rounded
          flex flex-col
          p-3 sm:p-4 lg:p-6
          relative z-10 shadow-lg
-         min-h-[520px] landscape:min-h-0"
+         min-h-[520px] md:min-h-0"
 ><div class="flex items-center justify-between mb-8 pb-3 border-b border-border-subtle">
 <div class="flex items-center gap-3">
 <span aria-hidden="true" class="material-symbols-outlined text-text-dim text-sm" data-icon="gamepad">gamepad</span>
@@ -197,8 +196,7 @@
 </div>
 <!-- Directional Pad -->
 <div class="flex-1 flex flex-col items-center justify-center py-4">
-<div class="relative w-[220px] h-[220px] sm:w-[250px] sm:h-[250px] lg:w-[300px] lg:h-[300px]"><!-- Forward -->
-<button id="forwardBtn" data-command="forward" aria-label="Forward" class="control-btn drive-btn absolute top-0 left-1/2 -translate-x-1/2 w-24 h-24 rounded flex flex-col items-center justify-center group focus:outline-none" type="button">
+<div class="relative w-[200px] h-[200px] sm:w-[230px] sm:h-[230px] lg:w-[260px] lg:h-[260px]"><button id="forwardBtn" data-command="forward" aria-label="Forward" class="control-btn drive-btn absolute top-0 left-1/2 -translate-x-1/2 w-24 h-24 rounded flex flex-col items-center justify-center group focus:outline-none" type="button">
 <span aria-hidden="true" class="material-symbols-outlined text-text-dim group-active:text-primary-container transition-colors text-4xl" data-icon="keyboard_arrow_up">keyboard_arrow_up</span>
 </button>
 <!-- Left -->
@@ -239,14 +237,10 @@
 </section>
 <!-- Right Panel: Functions (60%) -->
 <section
-  class="w-full
-         landscape:w-[62%]
-         lg:w-[60%]
-         flex flex-col
+  class="min-w-0 flex flex-col
          gap-3 sm:gap-4
          relative z-10
-         min-w-0
-         landscape:h-full"
+         h-full"
 ><!-- Sensor View Area -->
 <div class="bg-surface-panel panel-border rounded flex flex-col overflow-hidden shrink-0 shadow-lg">
 <div class="flex justify-between items-center px-4 py-2.5 border-b border-border-subtle bg-surface-dim">
@@ -282,8 +276,8 @@
 </div>
 </div>
 <!-- Compact Controls Grid -->
-<div class="grid grid-cols-4 gap-6 shrink-0">
-<!-- Mic -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 shrink-0">
+        <!-- Mic -->
 <button id="micBtn" type="button" class="function-btn bg-surface-panel panel-border rounded p-4 flex flex-col items-center gap-3 relative shadow-md text-left">
 <span class="absolute top-2 left-2 font-data-mono text-[8px] text-border-subtle">INMP441</span>
 <span aria-hidden="true" class="material-symbols-outlined text-text-dim text-2xl mt-2" data-icon="mic_off">mic_off</span>
