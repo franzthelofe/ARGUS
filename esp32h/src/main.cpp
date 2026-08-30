@@ -1,24 +1,25 @@
+// main.cpp
+
+#include "fLed.h"
+#include "wifi_hdl.h"
 
 #include <Arduino.h>
 #include <FastLED.h>
 
-#define NUM_LEDS 1
-#define DATA_PIN 48
-
-int i = 0;
-
-CRGB leds[NUM_LEDS];
-
-void setup()
-{
-    FastLED.addLeds<SK6812, DATA_PIN, GRB>(leds, NUM_LEDS);
-    Serial.begin(115200);
-}
+#define WIFI_SSID     "ARGUS Controller"
+#define WIFI_PASSWORD "argus1.0"
 
 unsigned long prevMillis = 0;
 const int interval = 1000;
 
-int color = 0;
+void setup()
+{
+    Serial.begin(115200);
+
+    FastLED.addLeds<SK6812, DATA_PIN, GRB>(led, NUM_LED);
+
+    setupWIFI(WIFI_SSID, WIFI_PASSWORD);
+}
 
 void loop()
 {
@@ -28,7 +29,8 @@ void loop()
     {
         prevMillis = currMillis;
 
-        leds[0] = CRGB::Black;
+        
         FastLED.show();
+        Serial.println("TIME: "); Serial.print((prevMillis/1000));
     }
 }
