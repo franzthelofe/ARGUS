@@ -542,3 +542,27 @@ and (orientation: landscape) {
         margin-top: 8px;
     }
 }
+/* Prevent mobile browser scrolling while pressing the D-pad */
+.drive-btn {
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* Prevent accidental long-press menu */
+.drive-btn,
+#estopBtn,
+.view-toggle {
+    -webkit-touch-callout: none;
+}
+
+/* Make buttons feel interactive */
+.drive-btn:active {
+    transform: scale(0.95);
+}
+
+.view-toggle:active,
+.function-btn:active,
+#estopBtn:active {
+    transform: scale(0.98);
+}

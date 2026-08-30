@@ -2352,3 +2352,213 @@ function escapeHtml(value) {
 }
 
 })();
+// ======================================================
+// ARGUS BUTTON CONTROLS - SAFE BUTTON SNIPPET
+// ======================================================
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    // -------------------------
+    // Helper: send command
+    // -------------------------
+    function sendCommand(command) {
+        console.log("[COMMAND] " + command);
+
+        // Prevent the page from moving when a control is pressed
+        window.scrollTo({
+            top: window.scrollY,
+            behavior: "instant"
+        });
+
+        // Add command to system console
+        const consoleEl = document.getElementById("systemConsole");
+
+        if (consoleEl) {
+            const line = document.createElement("div");
+
+            line.className = "mb-1";
+
+            const time = new Date().toLocaleTimeString();
+
+            line.innerHTML =
+                `<span class="text-text-dim/50 mr-2">[${time}]</span>` +
+                `&gt; COMMAND: ${command.toUpperCase()}`;
+
+            consoleEl.appendChild(line);
+
+            // Keep ONLY the console at the bottom
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+        }
+    }
+
+
+    // ==================================================
+    // MOVEMENT BUTTONS
+    // ==================================================
+
+    const movementButtons = {
+        forwardBtn: "forward",
+        reverseBtn: "reverse",
+        leftBtn: "left",
+        rightBtn: "right",
+        stopBtn: "stop"
+    };
+
+
+    Object.entries(movementButtons).forEach(([id, command]) => {
+
+        const button = document.getElementById(id);
+
+        if (!button) {
+            console.warn("Button not found:", id);
+            return;
+        }
+
+        // Mouse / touchscreen press
+        button.addEventListener("pointerdown", (event) => {
+            event.preventDefault();
+
+            button.setPointerCapture?.(event.pointerId);
+
+            sendCommand(command);
+        });
+
+        // Release button
+        button.addEventListener("pointerup", (event) => {
+            event.preventDefault();
+
+            // Stop automatically after releasing
+            if (command !== "stop") {
+                sendCommand("stop");
+            }
+        });
+
+        // If finger/mouse leaves the button
+        button.addEventListener("pointercancel", () => {
+            if (command !== "stop") {
+                sendCommand("stop");
+            }
+        });
+
+        button.addEventListener("contextmenu", (event) => {
+            event.preventDefault();
+        });
+    });
+
+
+    // ==================================================
+    // EMERGENCY STOP
+    // ==================================================
+
+    const estopBtn = document.getElementById("estopBtn");
+
+    if (estopBtn) {
+        estopBtn.addEventListener("click", (event) => {
+            event.preventDefault();
+
+            sendCommand("stop");
+
+            console.log("[EMERGENCY STOP]");
+        });
+    }
+
+
+    // ==================================================
+    // CAMERA / THERMAL SWITCH
+    // ==================================================
+
+    const cameraBtn = document.getElementById("cameraBtn");
+    const thermalBtn = document.getElementById("thermalBtn");
+
+    const cameraFeed = document.getElementById("cameraFeed");
+    const thermalCanvas = document.getElementById("thermalCanvas");
+
+    const viewModeLabel = document.getElementById("viewModeLabel");
+
+    if (cameraBtn) {
+        cameraBtn.addEventListener("click", (event) => {
+
+            event.preventDefault();
+
+            if (cameraFeed) {
+                cameraFeed.classList.remove("hidden");
+            }
+
+            if (thermalCanvas) {
+                thermalCanvas.classList.add("hidden");
+            }
+
+            if (viewModeLabel) {
+                viewModeLabel.textContent = "CAMERA FEED";
+            }
+
+            console.log("[VIEW] CAMERA");
+        });
+    }
+
+
+    if (thermalBtn) {
+        thermalBtn.addEventListener("click", (event) => {
+
+            event.preventDefault();
+
+            if (cameraFeed) {
+                cameraFeed.classList.add("hidden");
+            }
+
+            if (thermalCanvas) {
+                thermalCanvas.classList.remove("hidden");
+            }
+
+            if (viewModeLabel) {
+                viewModeLabel.textContent = "THERMAL FEED";
+            }
+
+            console.log("[VIEW] THERMAL");
+        });
+    }
+
+
+    // ==================================================
+    // SPEED SLIDER
+    // ==================================================
+
+    const speedSlider = document.getElementById("speedSlider");
+    const speedValue = document.getElementById("speedValue");
+
+    if (speedSlider && speedValue) {
+
+        speedSlider.addEventListener("input", () => {
+
+            const speed = speedSlider.value;
+
+            speedValue.textContent = speed + "%";
+
+            console.log("[SPEED] " + speed + "%");
+        });
+    }
+
+
+    // ==================================================
+    // PREVENT PAGE SCROLLING WHILE USING CONTROLS
+    // ==================================================
+
+    document.querySelectorAll(".drive-btn").forEach(button => {
+
+        button.addEventListener("touchstart", (event) => {
+            event.preventDefault();
+        }, { passive: false });
+
+        button.addEventListener("touchmove", (event) => {
+            event.preventDefault();
+        }, { passive: false });
+
+        button.addEventListener("touchend", (event) => {
+            event.preventDefault();
+        }, { passive: false });
+
+    });
+
+
+    console.log("[ARGUS] Button controls initialized.");
+});

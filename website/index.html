@@ -178,10 +178,18 @@
 </div>
 </header>
 <!-- Main Workspace -->
-<main class="flex-1 flex flex-col lg:flex-row w-full p-4 sm:p-6 gap-6 overflow-visible relative"><div class="absolute inset-0 grid-bg pointer-events-none"></div>
-<!-- Left Panel: Movement (40%) -->
-<section class="w-[40%] bg-surface-panel panel-border rounded flex flex-col p-6 relative z-10 shadow-lg">
-<div class="flex items-center justify-between mb-8 pb-3 border-b border-border-subtle">
+<main class="flex-1 grid grid-cols-1 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] w-full p-4 sm:p-6 gap-6 overflow-visible relative">
+><!-- Left Panel: Movement (40%) -->
+<section
+  class="w-full
+         landscape:w-[38%]
+         lg:w-[40%]
+         bg-surface-panel panel-border rounded
+         flex flex-col
+         p-3 sm:p-4 lg:p-6
+         relative z-10 shadow-lg
+         min-h-[520px] landscape:min-h-0"
+><div class="flex items-center justify-between mb-8 pb-3 border-b border-border-subtle">
 <div class="flex items-center gap-3">
 <span aria-hidden="true" class="material-symbols-outlined text-text-dim text-sm" data-icon="gamepad">gamepad</span>
 <h2 class="font-data-mono text-[12px] tracking-wider text-text-dim uppercase">MOVEMENT CONTROL</h2>
@@ -189,8 +197,7 @@
 </div>
 <!-- Directional Pad -->
 <div class="flex-1 flex flex-col items-center justify-center py-4">
-<div class="relative w-[300px] h-[300px]">
-<!-- Forward -->
+<div class="relative w-[220px] h-[220px] sm:w-[250px] sm:h-[250px] lg:w-[300px] lg:h-[300px]"><!-- Forward -->
 <button id="forwardBtn" data-command="forward" aria-label="Forward" class="control-btn drive-btn absolute top-0 left-1/2 -translate-x-1/2 w-24 h-24 rounded flex flex-col items-center justify-center group focus:outline-none" type="button">
 <span aria-hidden="true" class="material-symbols-outlined text-text-dim group-active:text-primary-container transition-colors text-4xl" data-icon="keyboard_arrow_up">keyboard_arrow_up</span>
 </button>
@@ -231,8 +238,16 @@
 </button>
 </section>
 <!-- Right Panel: Functions (60%) -->
-<section class="w-[60%] flex flex-col gap-6 relative z-10 h-full">
-<!-- Sensor View Area -->
+<section
+  class="w-full
+         landscape:w-[62%]
+         lg:w-[60%]
+         flex flex-col
+         gap-3 sm:gap-4
+         relative z-10
+         min-w-0
+         landscape:h-full"
+><!-- Sensor View Area -->
 <div class="bg-surface-panel panel-border rounded flex flex-col overflow-hidden shrink-0 shadow-lg">
 <div class="flex justify-between items-center px-4 py-2.5 border-b border-border-subtle bg-surface-dim">
 <div class="flex items-center gap-3">
