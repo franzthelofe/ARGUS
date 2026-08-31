@@ -24,2331 +24,770 @@
   // CONNECTION VARIABLES
   // =====================================================
 
-  const DEFAULT_ESP32 =
-    localStorage.getItem("argusEsp32Url") || "";
+  const DEFAULT_ESP32 = localStorage.getItem("argusEsp32Url") || "";
 
-  let baseUrl =
-    DEFAULT_ESP32.replace(/\/+$/, "");
-
+  let baseUrl = DEFAULT_ESP32.replace(/\/+$/, "");
   let socket = null;
-
   let connected = false;
-
   let activeDrive = null;
-
   let speed = 50;
-
   let currentView = "camera";
-
   let micOn = false;
-
   let speakerOn = false;
-
   let lightOn = false;
 
+  // =====================================================
+  // DOM HELPERS
+  // =====================================================
+
+  const $ = (id) => document.getElementById(id);
+  const consoleEl = $("systemConsole");
 
   // =====================================================
-  // SHORTCUT FOR GETTING HTML ELEMENTS
-  // =====================================================
-
-  const $ = id =>
-    document.getElementById(id);
-
-
-  const consoleEl =
-    $("systemConsole");
-
-
-  // =====================================================
-  // CURRENT TIME
+  // CONSOLE / LOGGING
   // =====================================================
 
   function now() {
-
-    return new Date().toLocaleTimeString(
-      [],
-      {
-        hour12: false
-      }
-    );
-
+    return new Date().toLocaleTimeString([], { hour12: false });
   }
 
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
 
-  // =====================================================
-// SYSTEM CONSOLE
-// =====================================================
-
-function log(message, level = "normal") {
+  function log(message, level = "normal") {
     if (!consoleEl) return;
 
     const line = document.createElement("div");
-
-    // Set message color
-    if (level === "error") {
-        line.className = "mb-1 text-emergency-red";
-    } else if (level === "warn") {
-        line.className = "mb-1 text-primary-container";
-    } else {
-        line.className = "mb-1";
-    }
-
-    // Build message safely
-    const time = now();
+    line.className =
+      level === "error" ? "mb-1 text-emergency-red" :
+      level === "warn"  ? "mb-1 text-primary-container" :
+                          "mb-1";
 
     line.innerHTML =
-        '<span class="text-text-dim/50 mr-2">[' +
-        escapeHtml(time) +
-        ']</span> &gt; ' +
-        escapeHtml(message);
+      `<span class="text-text-dim/50 mr-2">[${escapeHtml(now())}]</span> &gt; ${escapeHtml(message)}`;
 
-    // Remove old cursor
-    const oldCursor = consoleEl.querySelector(
-        ".argus-console-cursor"
-    );
+    const oldCursor = consoleEl.querySelector(".argus-console-cursor");
+    if (oldCursor) oldCursor.remove();
 
-    if (oldCursor) {
-        oldCursor.remove();
-    }
-
-    // Add new message
     consoleEl.appendChild(line);
 
-    // Add cursor
     const cursor = document.createElement("div");
-
-    cursor.className =
-        "argus-console-cursor mt-2 text-primary-container animate-pulse";
-
+    cursor.className = "argus-console-cursor mt-2 text-primary-container animate-pulse";
     cursor.textContent = "_";
-
     consoleEl.appendChild(cursor);
 
-    // IMPORTANT:
-    // Scroll only the console.
-    // Do NOT use scrollIntoView().
+    // Scroll only the console, never the page.
     requestAnimationFrame(() => {
-        consoleEl.scrollTop = consoleEl.scrollHeight;
+      consoleEl.scrollTop = consoleEl.scrollHeight;
     });
-}
+  }
 
-
-// =====================================================
-// HTML ESCAPE
-// =====================================================
-
-function escapeHtml(value) {
-    return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
-
-}
-
+  // =====================================================
   // CONNECTION STATE
   // =====================================================
 
-  function setConnectionState(
-    state,
-    reason = ""
-  ) {
-
+  function setConnectionState(state, reason = "") {
     connected = state;
 
-
-    const connectionText =
-      $("connectionText");
-
+    const connectionText = $("connectionText");
     if (connectionText) {
-
-      connectionText.textContent =
-        state
-          ? "[ CONNECTED ]"
-          : "[ DISCONNECTED ]";
-
+      connectionText.textContent = state ? "[ CONNECTED ]" : "[ DISCONNECTED ]";
     }
 
-
-    const badge =
-      $("connectionBadge");
-
-
+    const badge = $("connectionBadge");
     if (badge) {
-
-      badge.classList.toggle(
-        "border-emergency-red/30",
-        !state
-      );
-
-      badge.classList.toggle(
-        "border-primary-container/50",
-        state
-      );
-
+      badge.classList.toggle("border-emergency-red/30", !state);
+      badge.classList.toggle("border-primary-container/50", state);
     }
 
-
-    const connectBtn =
-      $("connectBtn");
-
-
+    const connectBtn = $("connectBtn");
     if (connectBtn) {
-
-      connectBtn.textContent =
-        state
-          ? "DISCONNECT"
-          : "CONNECT";
-
+      connectBtn.textContent = state ? "DISCONNECT" : "CONNECT";
     }
 
-
-    const bluetoothStatus =
-      $("bluetoothStatus");
-
-
+    const bluetoothStatus = $("bluetoothStatus");
     if (bluetoothStatus) {
-
-      bluetoothStatus.textContent =
-        state
-          ? "ESP32 LINK"
-          : "DISCONNECTED";
-
-
-      bluetoothStatus.className =
-        state
-          ? "font-data-mono text-[10px] text-primary-container font-bold"
-          : "font-data-mono text-[10px] text-emergency-red font-bold";
-
+      bluetoothStatus.textContent = state ? "ESP32 LINK" : "DISCONNECTED";
+      bluetoothStatus.className = state
+        ? "font-data-mono text-[10px] text-primary-container font-bold"
+        : "font-data-mono text-[10px] text-emergency-red font-bold";
     }
-
 
     if (reason) {
-
-      log(
-        reason,
-        state
-          ? "normal"
-          : "error"
-      );
-
+      log(reason, state ? "normal" : "error");
     }
-
   }
 
-
   // =====================================================
-  // NORMALIZE ESP32 ADDRESS
+  // HTTP COMMANDS
   // =====================================================
 
   function normalizeBase(url) {
-
     if (!url) return "";
-
-
     url = url.trim();
-
-
     if (!/^https?:\/\//i.test(url)) {
-
-      url =
-        "http://" + url;
-
+      url = "http://" + url;
     }
-
-
-    return url.replace(
-      /\/+$/,
-      ""
-    );
-
+    return url.replace(/\/+$/, "");
   }
 
-
-  // =====================================================
-  // HTTP COMMAND
-  // =====================================================
-
-  async function httpCommand(
-    command,
-    extra = {}
-  ) {
-
+  async function httpCommand(command, extra = {}) {
     if (!baseUrl) {
-
-      log(
-        "No ESP32-S3 URL configured.",
-        "warn"
-      );
-
+      log("No ESP32-S3 URL configured.", "warn");
       return false;
-
     }
-
 
     try {
-
-      const response =
-        await fetch(
-          `${baseUrl}/api/command`,
-          {
-            method: "POST",
-
-            headers: {
-              "Content-Type":
-                "application/json"
-            },
-
-            body:
-              JSON.stringify({
-                command,
-                ...extra
-              })
-          }
-        );
-
+      const response = await fetch(`${baseUrl}/api/command`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ command, ...extra }),
+      });
 
       if (!response.ok) {
-
-        throw new Error(
-          `HTTP ${response.status}`
-        );
-
+        throw new Error(`HTTP ${response.status}`);
       }
 
-
       return true;
-
-    }
-
-    catch (e) {
-
-      log(
-        `Command ${command} failed: ${e.message}`,
-        "error"
-      );
-
-
+    } catch (e) {
+      log(`Command ${command} failed: ${e.message}`, "error");
       setConnectionState(false);
-
-
       return false;
-
     }
-
   }
 
-
   // =====================================================
-  // SEND COMMAND
-  // =====================================================
-
-  function sendCommand(
-    command,
-    extra = {}
-  ) {
-
-    const payload = {
-
-      type: "command",
-
-      command,
-
-      speed,
-
-      ...extra
-
-    };
-
-
-    // Prefer WebSocket
-
-    if (
-      socket &&
-      socket.readyState ===
-        WebSocket.OPEN
-    ) {
-
-      socket.send(
-        JSON.stringify(payload)
-      );
-
-      return true;
-
-    }
-
-
-    // HTTP fallback
-
-    httpCommand(
-      command,
-      {
-        speed,
-        ...extra
-      }
-    );
-
-
-    return false;
-
-  }
-
-
-  // =====================================================
-  // CONNECT WEBSOCKET
+  // WEBSOCKET
   // =====================================================
 
   function connectSocket() {
-
     if (!baseUrl) return;
 
-
-    const wsUrl =
-      baseUrl.replace(
-        /^http/i,
-        "ws"
-      ) + "/ws";
-
+    const wsUrl = baseUrl.replace(/^http/i, "ws") + "/ws";
 
     try {
-
-      socket =
-        new WebSocket(wsUrl);
-
+      socket = new WebSocket(wsUrl);
 
       socket.onopen = () => {
-
-        setConnectionState(
-          true,
-          `WebSocket connected: ${wsUrl}`
-        );
-
-
-        socket.send(
-          JSON.stringify({
-            type: "hello",
-            client: "ARGUS-WEB",
-            version: "3.0"
-          })
-        );
-
-
+        setConnectionState(true, `WebSocket connected: ${wsUrl}`);
+        socket.send(JSON.stringify({ type: "hello", client: "ARGUS-WEB", version: "3.0" }));
         updateSensorState();
-
       };
 
+      socket.onmessage = (event) => {
+        try {
+          handleMessage(JSON.parse(event.data));
+        } catch {
+          log(`WS: ${event.data}`);
+        }
+      };
 
-      socket.onmessage =
-        event => {
+      socket.onerror = () => {
+        log("WebSocket error.", "error");
+      };
 
-          try {
-
-            handleMessage(
-              JSON.parse(event.data)
-            );
-
-          }
-
-          catch {
-
-            log(
-              `WS: ${event.data}`
-            );
-
-          }
-
-        };
-
-
-      socket.onerror =
-        () => {
-
-          log(
-            "WebSocket error.",
-            "error"
-          );
-
-        };
-
-
-      socket.onclose =
-        () => {
-
-          if (connected) {
-
-            log(
-              "ESP32 WebSocket closed.",
-              "warn"
-            );
-
-          }
-
-
-          setConnectionState(false);
-
-
-          socket = null;
-
-        };
-
+      socket.onclose = () => {
+        if (connected) {
+          log("ESP32 WebSocket closed.", "warn");
+        }
+        setConnectionState(false);
+        socket = null;
+      };
+    } catch (e) {
+      log(`WebSocket unavailable: ${e.message}`, "error");
     }
-
-    catch (e) {
-
-      log(
-        `WebSocket unavailable: ${e.message}`,
-        "error"
-      );
-
-    }
-
   }
 
-
   // =====================================================
-  // OPEN CONNECTION WINDOW
+  // CONNECTION / DISCONNECTION
   // =====================================================
 
   async function connect() {
-
-    const modal =
-      $("connectionModal");
-
-
+    const modal = $("connectionModal");
     if (!modal) return;
 
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
 
-    modal.classList.remove(
-      "hidden"
-    );
-
-
-    modal.classList.add(
-      "flex"
-    );
-
-
-    const input =
-      $("esp32Url");
-
-
+    const input = $("esp32Url");
     if (input) {
-
-      input.value =
-        baseUrl;
-
+      input.value = baseUrl;
     }
-
   }
-
-
-  // =====================================================
-  // ACTUALLY CONNECT
-  // =====================================================
 
   async function doConnect() {
-
-    baseUrl =
-      normalizeBase(
-        $("esp32Url").value
-      );
-
+    const input = $("esp32Url");
+    baseUrl = normalizeBase(input ? input.value : "");
 
     if (!baseUrl) {
-
-      log(
-        "Enter the ESP32-S3 IP address or hostname.",
-        "warn"
-      );
-
+      log("Enter the ESP32-S3 IP address or hostname.", "warn");
       return;
-
     }
 
+    localStorage.setItem("argusEsp32Url", baseUrl);
 
-    localStorage.setItem(
-      "argusEsp32Url",
-      baseUrl
-    );
+    const modal = $("connectionModal");
+    if (modal) {
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
 
-
-    $("connectionModal")
-      .classList.add("hidden");
-
-
-    $("connectionModal")
-      .classList.remove("flex");
-
-
-    log(
-      `Connecting to ESP32-S3 at ${baseUrl}...`
-    );
-
+    log(`Connecting to ESP32-S3 at ${baseUrl}...`);
 
     try {
-
-      const r =
-        await fetch(
-          `${baseUrl}/api/status`,
-          {
-            cache: "no-store"
-          }
-        );
-
+      const r = await fetch(`${baseUrl}/api/status`, { cache: "no-store" });
 
       if (r.ok) {
-
-        const data =
-          await r.json();
-
-
-        handleMessage({
-          type: "status",
-          ...data
-        });
-
+        const data = await r.json();
+        handleMessage({ type: "status", ...data });
       }
 
-
-      setConnectionState(
-        true,
-        "ESP32-S3 HTTP link responding."
-      );
-
+      setConnectionState(true, "ESP32-S3 HTTP link responding.");
+    } catch (e) {
+      log(`HTTP status check failed: ${e.message}. Trying WebSocket...`, "warn");
     }
-
-    catch (e) {
-
-      log(
-        `HTTP status check failed: ${e.message}. Trying WebSocket...`,
-        "warn"
-      );
-
-    }
-
 
     connectSocket();
-
-
     updateSensorState();
-
   }
-
-
-  // =====================================================
-  // DISCONNECT
-  // =====================================================
 
   function disconnect() {
-
     if (socket) {
-
       socket.close();
-
     }
 
-
     socket = null;
-
-
-    setConnectionState(
-      false,
-      "Disconnected by operator."
-    );
-
-
+    setConnectionState(false, "Disconnected by operator.");
     stopDrive();
-
   }
 
-
   // =====================================================
-  // SENSOR VIEW
+  // CAMERA / THERMAL
   // =====================================================
 
   function updateSensorState() {
+    const camera = $("cameraFeed");
+    const thermal = $("thermalCanvas");
+    const placeholder = $("sensorPlaceholder");
+    const thermalReadout = $("thermalReadout");
 
-    const camera =
-      $("cameraFeed");
+    if (!camera || !thermal || !placeholder) return;
 
+    if (currentView === "camera") {
+      const viewModeLabel = $("viewModeLabel");
+      if (viewModeLabel) viewModeLabel.textContent = "CAMERA FEED";
 
-    const thermal =
-      $("thermalCanvas");
+      camera.classList.remove("hidden");
+      thermal.classList.add("hidden");
+      if (thermalReadout) thermalReadout.classList.add("hidden");
 
+      const icon = $("sensorPlaceholderIcon");
+      if (icon) icon.textContent = connected ? "videocam" : "videocam_off";
 
-    const placeholder =
-      $("sensorPlaceholder");
+      const text = $("sensorPlaceholderText");
+      if (text) text.textContent = connected ? "WAITING FOR CAMERA STREAM" : "WAITING FOR ESP32-S3";
 
+      if (connected && baseUrl) {
+        const stream = `${baseUrl}/stream`;
+        if (camera.src !== stream) camera.src = stream;
 
-    const thermalReadout =
-      $("thermalReadout");
+        camera.onload = () => placeholder.classList.add("hidden");
+        camera.onerror = () => {
+          placeholder.classList.remove("hidden");
+          if (text) text.textContent = "CAMERA STREAM UNAVAILABLE";
+        };
+      } else {
+        camera.removeAttribute("src");
+        placeholder.classList.remove("hidden");
+      }
+    } else {
+      const viewModeLabel = $("viewModeLabel");
+      if (viewModeLabel) viewModeLabel.textContent = "THERMAL";
 
+      camera.classList.add("hidden");
+      thermal.classList.remove("hidden");
+      if (thermalReadout) thermalReadout.classList.remove("hidden");
 
-    if (
-      !camera ||
-      !thermal ||
-      !placeholder
-    ) {
+      placeholder.classList.toggle("hidden", connected);
 
-      return;
+      const icon = $("sensorPlaceholderIcon");
+      if (icon) icon.textContent = "device_thermostat";
 
+      const text = $("sensorPlaceholderText");
+      if (text) text.textContent = connected ? "WAITING FOR MLX90640" : "WAITING FOR ESP32-S3";
+
+      if (connected) pollThermal();
     }
-
-
-    // CAMERA
-
-    if (
-      currentView ===
-      "camera"
-    ) {
-
-      $("viewModeLabel")
-        .textContent =
-        "CAMERA FEED";
-
-
-      camera.classList.remove(
-        "hidden"
-      );
-
-
-      thermal.classList.add(
-        "hidden"
-      );
-
-
-      if (thermalReadout) {
-
-        thermalReadout.classList.add(
-          "hidden"
-        );
-
-      }
-
-
-      $("sensorPlaceholderIcon")
-        .textContent =
-        connected
-          ? "videocam"
-          : "videocam_off";
-
-
-      $("sensorPlaceholderText")
-        .textContent =
-        connected
-          ? "WAITING FOR CAMERA STREAM"
-          : "WAITING FOR ESP32-S3";
-
-
-      if (
-        connected &&
-        baseUrl
-      ) {
-
-        const stream =
-          `${baseUrl}/stream`;
-
-
-        if (
-          camera.src !==
-          stream
-        ) {
-
-          camera.src =
-            stream;
-
-        }
-
-
-        camera.onload =
-          () => {
-
-            placeholder.classList.add(
-              "hidden"
-            );
-
-          };
-
-
-        camera.onerror =
-          () => {
-
-            placeholder.classList.remove(
-              "hidden"
-            );
-
-
-            $("sensorPlaceholderText")
-              .textContent =
-              "CAMERA STREAM UNAVAILABLE";
-
-          };
-
-      }
-
-      else {
-
-        camera.removeAttribute(
-          "src"
-        );
-
-
-        placeholder.classList.remove(
-          "hidden"
-        );
-
-      }
-
-    }
-
-
-    // THERMAL
-
-    else {
-
-      $("viewModeLabel")
-        .textContent =
-        "THERMAL";
-
-
-      camera.classList.add(
-        "hidden"
-      );
-
-
-      thermal.classList.remove(
-        "hidden"
-      );
-
-
-      if (thermalReadout) {
-
-        thermalReadout.classList.remove(
-          "hidden"
-        );
-
-      }
-
-
-      placeholder.classList.toggle(
-        "hidden",
-        connected
-      );
-
-
-      $("sensorPlaceholderIcon")
-        .textContent =
-        "device_thermostat";
-
-
-      $("sensorPlaceholderText")
-        .textContent =
-        connected
-          ? "WAITING FOR MLX90640"
-          : "WAITING FOR ESP32-S3";
-
-
-      if (connected) {
-
-        pollThermal();
-
-      }
-
-    }
-
   }
-
-
-  // =====================================================
-  // POLL THERMAL SENSOR
-  // =====================================================
 
   async function pollThermal() {
-
-    if (
-      currentView !== "thermal" ||
-      !connected ||
-      !baseUrl
-    ) {
-
-      return;
-
-    }
-
+    if (currentView !== "thermal" || !connected || !baseUrl) return;
 
     try {
+      const r = await fetch(`${baseUrl}/api/thermal`, { cache: "no-store" });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
 
-      const r =
-        await fetch(
-          `${baseUrl}/api/thermal`,
-          {
-            cache: "no-store"
-          }
-        );
-
-
-      if (!r.ok) {
-
-        throw new Error(
-          `HTTP ${r.status}`
-        );
-
-      }
-
-
-      const data =
-        await r.json();
-
-
-      handleMessage({
-        type: "thermal",
-        ...data
-      });
-
+      const data = await r.json();
+      handleMessage({ type: "thermal", ...data });
+    } catch (_) {
+      // WebSocket telemetry may be used instead.
     }
 
-    catch (_) {
-
-      // WebSocket telemetry may
-      // be used instead.
-
+    if (currentView === "thermal") {
+      setTimeout(pollThermal, 250);
     }
-
-
-    if (
-      currentView ===
-      "thermal"
-    ) {
-
-      setTimeout(
-        pollThermal,
-        250
-      );
-
-    }
-
   }
-
-
-  // =====================================================
-  // SWITCH CAMERA / THERMAL
-  // =====================================================
 
   function setView(view) {
+    currentView = view;
 
-    currentView =
-      view;
-
-
-    const cameraBtn =
-      $("cameraBtn");
-
-
-    const thermalBtn =
-      $("thermalBtn");
-
+    const cameraBtn = $("cameraBtn");
+    const thermalBtn = $("thermalBtn");
 
     if (cameraBtn) {
-
-      cameraBtn.classList.toggle(
-        "text-primary-container",
-        view === "camera"
-      );
-
-
-      cameraBtn.classList.toggle(
-        "border-primary-container/50",
-        view === "camera"
-      );
-
-
-      cameraBtn.classList.toggle(
-        "bg-surface-panel",
-        view === "camera"
-      );
-
+      cameraBtn.classList.toggle("text-primary-container", view === "camera");
+      cameraBtn.classList.toggle("border-primary-container/50", view === "camera");
+      cameraBtn.classList.toggle("bg-surface-panel", view === "camera");
     }
-
 
     if (thermalBtn) {
-
-      thermalBtn.classList.toggle(
-        "text-primary-container",
-        view === "thermal"
-      );
-
-
-      thermalBtn.classList.toggle(
-        "border-primary-container/50",
-        view === "thermal"
-      );
-
-
-      thermalBtn.classList.toggle(
-        "bg-surface-panel",
-        view === "thermal"
-      );
-
+      thermalBtn.classList.toggle("text-primary-container", view === "thermal");
+      thermalBtn.classList.toggle("border-primary-container/50", view === "thermal");
+      thermalBtn.classList.toggle("bg-surface-panel", view === "thermal");
     }
 
-
-    sendCommand(
-      view === "camera"
-        ? "view_camera"
-        : "view_thermal"
-    );
-
-
+    sendCommand(view === "camera" ? "view_camera" : "view_thermal");
     updateSensorState();
-
-
-    log(
-      `Sensor view: ${view.toUpperCase()}`
-    );
-
+    log(`Sensor view: ${view.toUpperCase()}`);
   }
-
-
-  // =====================================================
-  // PRESS AND HOLD MOVEMENT
-  // =====================================================
-
-  function bindHoldButton(
-    id,
-    command
-  ) {
-
-    const btn =
-      $(id);
-
-
-    if (!btn) return;
-
-
-    let held = false;
-
-
-    const start =
-      e => {
-
-        e.preventDefault();
-
-
-        if (held) return;
-
-
-        held = true;
-
-
-        activeDrive =
-          command;
-
-
-        btn.classList.add(
-          "is-held"
-        );
-
-
-        sendCommand(
-          command
-        );
-
-
-        log(
-          `DRIVE ${command.toUpperCase()} @ ${speed}%`
-        );
-
-      };
-
-
-    const end =
-      e => {
-
-        if (e) {
-
-          e.preventDefault();
-
-        }
-
-
-        if (!held) return;
-
-
-        held = false;
-
-
-        btn.classList.remove(
-          "is-held"
-        );
-
-
-        if (
-          activeDrive ===
-          command
-        ) {
-
-          stopDrive();
-
-        }
-
-      };
-
-
-    btn.addEventListener(
-      "pointerdown",
-      start
-    );
-
-
-    btn.addEventListener(
-      "pointerup",
-      end
-    );
-
-
-    btn.addEventListener(
-      "pointercancel",
-      end
-    );
-
-
-    btn.addEventListener(
-      "pointerleave",
-      end
-    );
-
-
-    btn.addEventListener(
-      "contextmenu",
-      e =>
-        e.preventDefault()
-    );
-
-  }
-
-
-  // =====================================================
-  // STOP ROBOT
-  // =====================================================
-
-  function stopDrive() {
-
-    activeDrive =
-      null;
-
-
-    document
-      .querySelectorAll(
-        ".drive-btn"
-      )
-      .forEach(
-        b =>
-          b.classList.remove(
-            "is-held"
-          )
-      );
-
-
-    sendCommand(
-      "stop"
-    );
-
-  }
-
-
-  // =====================================================
-  // TOGGLE FUNCTIONS
-  // =====================================================
-
-  function bindToggle(
-    id,
-    getState,
-    setState,
-    command,
-    statusId
-  ) {
-
-    const btn =
-      $(id);
-
-
-    if (!btn) return;
-
-
-    btn.addEventListener(
-      "click",
-      () => {
-
-        const next =
-          !getState();
-
-
-        setState(
-          next
-        );
-
-
-        const status =
-          $(statusId);
-
-
-        if (status) {
-
-          status.textContent =
-            next
-              ? "ON"
-              : "OFF";
-
-
-          status.className =
-            next
-              ? "font-data-mono text-[10px] text-primary-container font-bold"
-              : "font-data-mono text-[10px] text-text-dim font-bold";
-
-        }
-
-
-        btn.classList.toggle(
-          "active",
-          next
-        );
-
-
-        sendCommand(
-          command,
-          {
-            on: next
-          }
-        );
-
-
-        log(
-          `${command.toUpperCase()}: ${
-            next ? "ON" : "OFF"
-          }`
-        );
-
-      }
-    );
-
-  }
-
 
   // =====================================================
   // PROCESS ESP32 MESSAGES
   // =====================================================
 
   function handleMessage(msg) {
+    if (!msg || typeof msg !== "object") return;
 
-    if (
-      !msg ||
-      typeof msg !==
-        "object"
-    ) {
-
-      return;
-
-    }
-
-
-    // STATUS
-
-    if (
-      msg.type ===
-      "status"
-    ) {
-
-      if (
-        typeof msg.battery ===
-        "number"
-      ) {
-
-        const battery =
-          $("batteryValue");
-
-
-        if (battery) {
-
-          battery.textContent =
-            `${Math.round(msg.battery)}%`;
-
-        }
-
+    if (msg.type === "status") {
+      if (typeof msg.battery === "number") {
+        const battery = $("batteryValue");
+        if (battery) battery.textContent = `${Math.round(msg.battery)}%`;
       }
 
-
-      if (
-        msg.connected !==
-        undefined
-      ) {
-
-        setConnectionState(
-          !!msg.connected
-        );
-
+      if (msg.connected !== undefined) {
+        setConnectionState(!!msg.connected);
       }
 
-
-      if (
-        msg.mic !==
-        undefined
-      ) {
-
-        micOn =
-          !!msg.mic;
-
-
-        $("micStatus")
-          .textContent =
-          micOn
-            ? "ON"
-            : "OFF";
-
+      if (msg.mic !== undefined) {
+        micOn = !!msg.mic;
+        const el = $("micStatus");
+        if (el) el.textContent = micOn ? "ON" : "OFF";
       }
 
-
-      if (
-        msg.speaker !==
-        undefined
-      ) {
-
-        speakerOn =
-          !!msg.speaker;
-
-
-        $("speakerStatus")
-          .textContent =
-          speakerOn
-            ? "ON"
-            : "OFF";
-
+      if (msg.speaker !== undefined) {
+        speakerOn = !!msg.speaker;
+        const el = $("speakerStatus");
+        if (el) el.textContent = speakerOn ? "ON" : "OFF";
       }
 
-
-      if (
-        msg.light !==
-        undefined
-      ) {
-
-        lightOn =
-          !!msg.light;
-
-
-        $("lightStatus")
-          .textContent =
-          lightOn
-            ? "ON"
-            : "OFF";
-
+      if (msg.light !== undefined) {
+        lightOn = !!msg.light;
+        const el = $("lightStatus");
+        if (el) el.textContent = lightOn ? "ON" : "OFF";
       }
-
-    }
-
-
-    // THERMAL DATA
-
-    else if (
-      msg.type ===
-      "thermal"
-    ) {
-
-      drawThermal(
-        msg.pixels ||
-        msg.data ||
-        [],
-        msg.min,
-        msg.max,
-        msg.center
-      );
-
-    }
-
-
-    // COMMAND ACKNOWLEDGEMENT
-
-    else if (
-      msg.type ===
-      "ack"
-    ) {
-
-      log(
-        `ACK: ${
-          msg.command ||
-          "command"
-        }`
-      );
-
-    }
-
-
-    // SYSTEM LOG
-
-    else if (
-      msg.type ===
-      "log"
-    ) {
-
-      log(
-        msg.message ||
-        "",
-        msg.level ||
-        "normal"
-      );
-
-    }
-
-
-    // BATTERY UPDATE
-
-    else if (
-      msg.type ===
-      "battery"
-    ) {
-
-      const value =
-        Number(
-          msg.value
-        );
-
-
-      if (
-        Number.isFinite(
-          value
-        )
-      ) {
-
-        $("batteryValue")
-          .textContent =
-          `${Math.round(value)}%`;
-
+    } else if (msg.type === "thermal") {
+      drawThermal(msg.pixels || msg.data || [], msg.min, msg.max, msg.center);
+    } else if (msg.type === "ack") {
+      log(`ACK: ${msg.command || "command"}`);
+    } else if (msg.type === "log") {
+      log(msg.message || "", msg.level || "normal");
+    } else if (msg.type === "battery") {
+      const value = Number(msg.value);
+      if (Number.isFinite(value)) {
+        const el = $("batteryValue");
+        if (el) el.textContent = `${Math.round(value)}%`;
       }
-
     }
-
   }
 
-
   // =====================================================
-  // THERMAL COLOR MAP
+  // THERMAL RENDERING
   // =====================================================
 
-  function thermalColor(
-    t,
-    min,
-    max
-  ) {
+  function thermalColor(t, min, max) {
+    let x = (t - min) / Math.max(0.001, max - min);
+    x = Math.max(0, Math.min(1, x));
 
-    let x =
-      (t - min) /
-      Math.max(
-        0.001,
-        max - min
-      );
-
-
-    x =
-      Math.max(
-        0,
-        Math.min(
-          1,
-          x
-        )
-      );
-
-
-    // Blue → Cyan → Green → Yellow → Red
-
+    // Blue -> Cyan -> Green -> Yellow -> Red
     const stops = [
-
-      [0, 20, 70, 180],
-
-      [.25, 0, 190, 255],
-
-      [.5, 40, 210, 100],
-
-      [.75, 255, 220, 0],
-
-      [1, 230, 40, 30]
-
+      [0,    20, 70,  180],
+      [0.25,  0, 190, 255],
+      [0.5,  40, 210, 100],
+      [0.75, 255, 220, 0],
+      [1,    230, 40, 30],
     ];
 
+    for (let i = 0; i < stops.length - 1; i++) {
+      if (x <= stops[i + 1][0]) {
+        const a = stops[i];
+        const b = stops[i + 1];
+        const q = (x - a[0]) / (b[0] - a[0]);
 
-    for (
-      let i = 0;
-      i < stops.length - 1;
-      i++
-    ) {
-
-      if (
-        x <=
-        stops[i + 1][0]
-      ) {
-
-        const a =
-          stops[i];
-
-
-        const b =
-          stops[i + 1];
-
-
-        const q =
-          (x - a[0]) /
-          (b[0] - a[0]);
-
-
-        return `rgb(
-          ${Math.round(
-            a[1] +
-            (b[1] - a[1]) * q
-          )},
-          ${Math.round(
-            a[2] +
-            (b[2] - a[2]) * q
-          )},
-          ${Math.round(
-            a[3] +
-            (b[3] - a[3]) * q
-          )}
-        )`;
-
+        return `rgb(${Math.round(a[1] + (b[1] - a[1]) * q)}, ${Math.round(a[2] + (b[2] - a[2]) * q)}, ${Math.round(a[3] + (b[3] - a[3]) * q)})`;
       }
-
     }
 
-
-    return "rgb(230,40,30)";
-
+    return "rgb(230, 40, 30)";
   }
 
-
-  // =====================================================
-  // DRAW MLX90640 THERMAL DATA
-  // =====================================================
-
-  function drawThermal(
-    pixels,
-    minHint,
-    maxHint,
-    centerHint
-  ) {
-
+  function drawThermal(pixels, minHint, maxHint, centerHint) {
     // MLX90640 = 32 x 24 = 768 pixels
+    if (!Array.isArray(pixels) || pixels.length < 768) return;
 
-    if (
-      !Array.isArray(pixels) ||
-      pixels.length < 768
-    ) {
-
-      return;
-
-    }
-
-
-    const canvas =
-      $("thermalCanvas");
-
-
+    const canvas = $("thermalCanvas");
     if (!canvas) return;
 
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
 
-    const rect =
-      canvas.getBoundingClientRect();
+    canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+    canvas.height = Math.max(1, Math.floor(rect.height * dpr));
 
+    const ctx = canvas.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    const dpr =
-      window.devicePixelRatio ||
-      1;
+    const w = rect.width;
+    const h = rect.height;
 
+    const vals = pixels.slice(0, 768).map(Number).filter(Number.isFinite);
+    if (!vals.length) return;
 
-    canvas.width =
-      Math.max(
-        1,
-        Math.floor(
-          rect.width * dpr
-        )
-      );
+    const min = Number.isFinite(Number(minHint)) ? Number(minHint) : Math.min(...vals);
+    const max = Number.isFinite(Number(maxHint)) ? Number(maxHint) : Math.max(...vals);
 
-
-    canvas.height =
-      Math.max(
-        1,
-        Math.floor(
-          rect.height * dpr
-        )
-      );
-
-
-    const ctx =
-      canvas.getContext(
-        "2d"
-      );
-
-
-    ctx.setTransform(
-      dpr,
-      0,
-      0,
-      dpr,
-      0,
-      0
-    );
-
-
-    const w =
-      rect.width;
-
-
-    const h =
-      rect.height;
-
-
-    const vals =
-      pixels
-        .slice(0, 768)
-        .map(Number)
-        .filter(
-          Number.isFinite
-        );
-
-
-    if (!vals.length) {
-
-      return;
-
-    }
-
-
-    const min =
-      Number.isFinite(
-        Number(minHint)
-      )
-        ? Number(minHint)
-        : Math.min(...vals);
-
-
-    const max =
-      Number.isFinite(
-        Number(maxHint)
-      )
-        ? Number(maxHint)
-        : Math.max(...vals);
-
-
-    const tmp =
-      document.createElement(
-        "canvas"
-      );
-
-
+    const tmp = document.createElement("canvas");
     const tw = 32;
-
     const th = 24;
+    tmp.width = tw;
+    tmp.height = th;
 
+    const tc = tmp.getContext("2d");
+    const image = tc.createImageData(tw, th);
 
-    tmp.width =
-      tw;
+    for (let y = 0; y < 24; y++) {
+      for (let x = 0; x < 32; x++) {
+        const color = thermalColor(vals[y * 32 + x], min, max).match(/\d+/g).map(Number);
+        const i = (y * 32 + x) * 4;
 
-
-    tmp.height =
-      th;
-
-
-    const tc =
-      tmp.getContext(
-        "2d"
-      );
-
-
-    const image =
-      tc.createImageData(
-        tw,
-        th
-      );
-
-
-    for (
-      let y = 0;
-      y < 24;
-      y++
-    ) {
-
-      for (
-        let x = 0;
-        x < 32;
-        x++
-      ) {
-
-        const color =
-          thermalColor(
-            vals[
-              y * 32 + x
-            ],
-            min,
-            max
-          )
-          .match(
-            /\d+/g
-          )
-          .map(Number);
-
-
-        const i =
-          (
-            y * 32 + x
-          ) * 4;
-
-
-        image.data[i] =
-          color[0];
-
-
-        image.data[i + 1] =
-          color[1];
-
-
-        image.data[i + 2] =
-          color[2];
-
-
-        image.data[i + 3] =
-          255;
-
+        image.data[i] = color[0];
+        image.data[i + 1] = color[1];
+        image.data[i + 2] = color[2];
+        image.data[i + 3] = 255;
       }
-
     }
 
+    tc.putImageData(image, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(tmp, 0, 0, w, h);
 
-    tc.putImageData(
-      image,
-      0,
-      0
-    );
+    const thermalMax = $("thermalMax");
+    const thermalMin = $("thermalMin");
+    const thermalCenter = $("thermalCenter");
 
+    if (thermalMax) thermalMax.textContent = Number(maxHint ?? max).toFixed(1);
+    if (thermalMin) thermalMin.textContent = Number(minHint ?? min).toFixed(1);
 
-    ctx.imageSmoothingEnabled =
-      true;
+    const center = Number.isFinite(Number(centerHint)) ? Number(centerHint) : vals[12 * 32 + 16];
+    if (thermalCenter) thermalCenter.textContent = center.toFixed(1);
 
-
-    ctx.drawImage(
-      tmp,
-      0,
-      0,
-      w,
-      h
-    );
-
-
-    const thermalMax =
-      $("thermalMax");
-
-
-    const thermalMin =
-      $("thermalMin");
-
-
-    const thermalCenter =
-      $("thermalCenter");
-
-
-    if (thermalMax) {
-
-      thermalMax.textContent =
-        Number(
-          maxHint ?? max
-        ).toFixed(1);
-
-    }
-
-
-    if (thermalMin) {
-
-      thermalMin.textContent =
-        Number(
-          minHint ?? min
-        ).toFixed(1);
-
-    }
-
-
-    const center =
-      Number.isFinite(
-        Number(centerHint)
-      )
-        ? Number(centerHint)
-        : vals[
-            12 * 32 + 16
-          ];
-
-
-    if (thermalCenter) {
-
-      thermalCenter.textContent =
-        center.toFixed(1);
-
-    }
-
-
-    const placeholder =
-      $("sensorPlaceholder");
-
-
-    if (placeholder) {
-
-      placeholder.classList.add(
-        "hidden"
-      );
-
-    }
-
+    const placeholder = $("sensorPlaceholder");
+    if (placeholder) placeholder.classList.add("hidden");
   }
 
+  // =====================================================
+  // GENERIC COMMAND SENDING
+  // =====================================================
+
+  function sendCommand(command, extra = {}) {
+    const payload = { type: "command", command, speed, ...extra };
+
+    // Prefer WebSocket.
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify(payload));
+      return true;
+    }
+
+    // HTTP fallback.
+    httpCommand(command, { speed, ...extra });
+    return false;
+  }
 
   // =====================================================
-  // UI EVENTS
+  // MOVEMENT CONTROL
+  // (single source of truth — used by pointer AND keyboard)
   // =====================================================
 
-  const connectBtn =
-    $("connectBtn");
+  function startDrive(command, triggerBtn = null) {
+    if (activeDrive === command) return;
 
+    activeDrive = command;
 
+    document.querySelectorAll(".drive-btn").forEach((b) => b.classList.remove("is-held"));
+
+    const btn = triggerBtn || document.querySelector(`[data-command="${command}"]`);
+    if (btn) btn.classList.add("is-held");
+
+    sendCommand(command);
+    log(`DRIVE ${command.toUpperCase()} @ ${speed}%`);
+  }
+
+  function releaseDrive(command) {
+    // Only stop if this release corresponds to the direction
+    // currently driving — an already-overridden key/button
+    // releasing later must not cancel the newer command.
+    if (activeDrive !== command) return;
+    stopDrive();
+  }
+
+  function stopDrive() {
+    activeDrive = null;
+    document.querySelectorAll(".drive-btn").forEach((b) => b.classList.remove("is-held"));
+    sendCommand("stop");
+  }
+
+  function bindHoldButton(id, command) {
+    const btn = $(id);
+    if (!btn) return;
+
+    // Prevent scrolling/dragging while operating this control.
+    btn.style.touchAction = "none";
+
+    let pointerId = null;
+
+    const start = (e) => {
+      e.preventDefault();
+      if (pointerId !== null) return; // already held by another pointer
+
+      pointerId = e.pointerId;
+      try { btn.setPointerCapture(pointerId); } catch (_) { /* ignore */ }
+
+      startDrive(command, btn);
+    };
+
+    const end = (e) => {
+      if (e) e.preventDefault();
+      if (pointerId === null) return;
+
+      try { btn.releasePointerCapture(pointerId); } catch (_) { /* ignore */ }
+      pointerId = null;
+
+      releaseDrive(command);
+    };
+
+    // Pointer Events only. No touchstart/touchend, no click handlers here.
+    // pointerleave is intentionally NOT bound: once pointer capture is set
+    // on pointerdown, this element keeps receiving pointerup/pointercancel
+    // even if the finger/cursor drifts outside its bounds, so relying on
+    // "leave" would stop the robot while the user is still holding it.
+    btn.addEventListener("pointerdown", start);
+    btn.addEventListener("pointerup", end);
+    btn.addEventListener("pointercancel", end);
+    btn.addEventListener("lostpointercapture", end);
+    btn.addEventListener("contextmenu", (e) => e.preventDefault());
+  }
+
+  // =====================================================
+  // TOGGLE CONTROLS
+  // =====================================================
+
+  function bindToggle(id, getState, setState, command, statusId) {
+    const btn = $(id);
+    if (!btn) return;
+
+    btn.addEventListener("click", () => {
+      const next = !getState();
+      setState(next);
+
+      const status = $(statusId);
+      if (status) {
+        status.textContent = next ? "ON" : "OFF";
+        status.className = next
+          ? "font-data-mono text-[10px] text-primary-container font-bold"
+          : "font-data-mono text-[10px] text-text-dim font-bold";
+      }
+
+      btn.classList.toggle("active", next);
+
+      sendCommand(command, { on: next });
+      log(`${command.toUpperCase()}: ${next ? "ON" : "OFF"}`);
+    });
+  }
+
+  // =====================================================
+  // KEYBOARD CONTROLS
+  // (drives the same startDrive/releaseDrive/stopDrive as
+  //  the on-screen buttons — no synthetic PointerEvents)
+  // =====================================================
+
+  const keys = new Map([
+    ["ArrowUp", "forward"], ["w", "forward"],
+    ["ArrowDown", "reverse"], ["s", "reverse"],
+    ["ArrowLeft", "left"], ["a", "left"],
+    ["ArrowRight", "right"], ["d", "right"],
+  ]);
+
+  window.addEventListener("keydown", (e) => {
+    if (e.repeat) return;
+    if (document.activeElement?.tagName === "INPUT") return;
+
+    const cmd = keys.get(e.key);
+    if (cmd) {
+      e.preventDefault();
+      const btn = document.querySelector(`[data-command="${cmd}"]`);
+      startDrive(cmd, btn);
+      return;
+    }
+
+    if (e.key === " ") {
+      e.preventDefault();
+      stopDrive();
+    }
+  });
+
+  window.addEventListener("keyup", (e) => {
+    const cmd = keys.get(e.key);
+    if (cmd) releaseDrive(cmd);
+  });
+
+  // =====================================================
+  // SAFETY CONTROLS
+  // =====================================================
+
+  // Stop the robot if the page loses focus or is hidden —
+  // a held key/pointer with no page focus can't reliably fire
+  // its own release event.
+  window.addEventListener("blur", stopDrive);
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) stopDrive();
+  });
+
+  // =====================================================
+  // INITIALIZATION
+  // =====================================================
+
+  // -- connection modal --
+  const connectBtn = $("connectBtn");
   if (connectBtn) {
-
-    connectBtn.addEventListener(
-      "click",
-      () => {
-
-        connected
-          ? disconnect()
-          : connect();
-
-      }
-    );
-
+    connectBtn.addEventListener("click", () => (connected ? disconnect() : connect()));
   }
 
-
-  const closeConnection =
-    $("closeConnection");
-
-
+  const closeConnection = $("closeConnection");
   if (closeConnection) {
-
-    closeConnection.addEventListener(
-      "click",
-      () => {
-
-        $("connectionModal")
-          .classList.add(
-            "hidden"
-          );
-
-
-        $("connectionModal")
-          .classList.remove(
-            "flex"
-          );
-
+    closeConnection.addEventListener("click", () => {
+      const modal = $("connectionModal");
+      if (modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
       }
-    );
-
+    });
   }
 
-
-  const cancelConnection =
-    $("cancelConnection");
-
-
+  const cancelConnection = $("cancelConnection");
   if (cancelConnection) {
-
-    cancelConnection.addEventListener(
-      "click",
-      () => {
-
-        $("connectionModal")
-          .classList.add(
-            "hidden"
-          );
-
-
-        $("connectionModal")
-          .classList.remove(
-            "flex"
-          );
-
+    cancelConnection.addEventListener("click", () => {
+      const modal = $("connectionModal");
+      if (modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
       }
-    );
-
+    });
   }
 
-
-  const saveConnection =
-    $("saveConnection");
-
-
+  const saveConnection = $("saveConnection");
   if (saveConnection) {
-
-    saveConnection.addEventListener(
-      "click",
-      doConnect
-    );
-
+    saveConnection.addEventListener("click", doConnect);
   }
 
-
-  // =====================================================
-  // SPEED
-  // =====================================================
-
-  const speedSlider =
-    $("speedSlider");
-
-
+  // -- speed --
+  const speedSlider = $("speedSlider");
   if (speedSlider) {
-
-    speedSlider.addEventListener(
-      "input",
-      e => {
-
-        speed =
-          Number(
-            e.target.value
-          );
-
-
-        const speedValue =
-          $("speedValue");
-
-
-        if (speedValue) {
-
-          speedValue.textContent =
-            `${speed}%`;
-
-        }
-
-      }
-    );
-
+    speedSlider.addEventListener("input", (e) => {
+      speed = Number(e.target.value);
+      const speedValue = $("speedValue");
+      if (speedValue) speedValue.textContent = `${speed}%`;
+    });
   }
 
-
-  // =====================================================
-  // EMERGENCY STOP
-  // =====================================================
-
-  const estopBtn =
-    $("estopBtn");
-
-
+  // -- emergency stop --
+  const estopBtn = $("estopBtn");
   if (estopBtn) {
-
-    estopBtn.addEventListener(
-      "click",
-      () => {
-
-        stopDrive();
-
-
-        sendCommand(
-          "estop"
-        );
-
-
-        log(
-          "EMERGENCY STOP COMMAND SENT.",
-          "error"
-        );
-
-      }
-    );
-
+    estopBtn.addEventListener("click", () => {
+      stopDrive();
+      sendCommand("estop");
+      log("EMERGENCY STOP COMMAND SENT.", "error");
+    });
   }
 
+  // -- movement buttons (the ONLY movement-control system) --
+  bindHoldButton("forwardBtn", "forward");
+  bindHoldButton("reverseBtn", "reverse");
+  bindHoldButton("leftBtn", "left");
+  bindHoldButton("rightBtn", "right");
 
-  // =====================================================
-  // MOVEMENT BUTTONS
-  // =====================================================
-
-  bindHoldButton(
-    "forwardBtn",
-    "forward"
-  );
-
-
-  bindHoldButton(
-    "reverseBtn",
-    "reverse"
-  );
-
-
-  bindHoldButton(
-    "leftBtn",
-    "left"
-  );
-
-
-  bindHoldButton(
-    "rightBtn",
-    "right"
-  );
-
-
-  const stopBtn =
-    $("stopBtn");
-
-
+  const stopBtn = $("stopBtn");
   if (stopBtn) {
-
-    stopBtn.addEventListener(
-      "click",
-      stopDrive
-    );
-
+    stopBtn.addEventListener("click", stopDrive);
   }
 
+  // -- camera / thermal --
+  const cameraBtn = $("cameraBtn");
+  if (cameraBtn) cameraBtn.addEventListener("click", () => setView("camera"));
 
-  // =====================================================
-  // CAMERA / THERMAL
-  // =====================================================
+  const thermalBtn = $("thermalBtn");
+  if (thermalBtn) thermalBtn.addEventListener("click", () => setView("thermal"));
 
-  const cameraBtn =
-    $("cameraBtn");
+  // -- microphone / speaker / light --
+  bindToggle("micBtn", () => micOn, (v) => (micOn = v), "microphone", "micStatus");
+  bindToggle("speakerBtn", () => speakerOn, (v) => (speakerOn = v), "speaker", "speakerStatus");
+  bindToggle("lightBtn", () => lightOn, (v) => (lightOn = v), "light", "lightStatus");
 
-
-  if (cameraBtn) {
-
-    cameraBtn.addEventListener(
-      "click",
-      () =>
-        setView("camera")
-    );
-
-  }
-
-
-  const thermalBtn =
-    $("thermalBtn");
-
-
-  if (thermalBtn) {
-
-    thermalBtn.addEventListener(
-      "click",
-      () =>
-        setView("thermal")
-    );
-
-  }
-
-
-  // =====================================================
-  // MICROPHONE
-  // =====================================================
-
-  bindToggle(
-    "micBtn",
-
-    () => micOn,
-
-    v => micOn = v,
-
-    "microphone",
-
-    "micStatus"
-  );
-
-
-  // =====================================================
-  // SPEAKER
-  // =====================================================
-
-  bindToggle(
-    "speakerBtn",
-
-    () => speakerOn,
-
-    v => speakerOn = v,
-
-    "speaker",
-
-    "speakerStatus"
-  );
-
-
-  // =====================================================
-  // LIGHT
-  // =====================================================
-
-  bindToggle(
-    "lightBtn",
-
-    () => lightOn,
-
-    v => lightOn = v,
-
-    "light",
-
-    "lightStatus"
-  );
-
-
-  // =====================================================
-  // BLUETOOTH
-  // =====================================================
-
-  const bluetoothBtn =
-    $("bluetoothBtn");
-
-
+  // -- bluetooth (informational only — link is ESP32-S3 -> HM-10 -> STM32) --
+  const bluetoothBtn = $("bluetoothBtn");
   if (bluetoothBtn) {
-
-    bluetoothBtn.addEventListener(
-      "click",
-      () => {
-
-        log(
-          "Bluetooth link is handled by ESP32-S3 → HM-10 → STM32.",
-          "warn"
-        );
-
-      }
-    );
-
+    bluetoothBtn.addEventListener("click", () => {
+      log("Bluetooth link is handled by ESP32-S3 -> HM-10 -> STM32.", "warn");
+    });
   }
 
-
-  // =====================================================
-  // CLEAR SYSTEM CONSOLE
-  // =====================================================
-
-  const clearConsole =
-    $("clearConsole");
-
-
+  // -- clear console --
+  const clearConsole = $("clearConsole");
   if (clearConsole) {
-
-    clearConsole.addEventListener(
-      "click",
-      () => {
-
-        consoleEl.innerHTML =
-          '<div class="mt-2 text-primary-container animate-pulse">_</div>';
-
+    clearConsole.addEventListener("click", () => {
+      if (consoleEl) {
+        consoleEl.innerHTML = '<div class="mt-2 text-primary-container animate-pulse">_</div>';
       }
-    );
-
+    });
   }
 
+  // -- initial state --
+  setView("camera");
 
-  // =====================================================
-  // KEYBOARD CONTROL
-  // =====================================================
+  if (speedSlider) speedSlider.value = speed;
 
-  const keys =
-    new Map([
-
-      [
-        "ArrowUp",
-        "forward"
-      ],
-
-      [
-        "w",
-        "forward"
-      ],
-
-      [
-        "ArrowDown",
-        "reverse"
-      ],
-
-      [
-        "s",
-        "reverse"
-      ],
-
-      [
-        "ArrowLeft",
-        "left"
-      ],
-
-      [
-        "a",
-        "left"
-      ],
-
-      [
-        "ArrowRight",
-        "right"
-      ],
-
-      [
-        "d",
-        "right"
-      ]
-
-    ]);
-
-
-  window.addEventListener(
-    "keydown",
-    e => {
-
-      if (e.repeat) return;
-
-
-      const cmd =
-        keys.get(e.key);
-
-
-      if (
-        cmd &&
-        document.activeElement?.tagName !==
-          "INPUT"
-      ) {
-
-        e.preventDefault();
-
-
-        const btn =
-          document.querySelector(
-            `[data-command="${cmd}"]`
-          );
-
-
-        if (btn) {
-
-          btn.dispatchEvent(
-            new PointerEvent(
-              "pointerdown",
-              {
-                bubbles: true
-              }
-            )
-          );
-
-        }
-
-      }
-
-
-      // SPACE = STOP
-
-      if (
-        e.key === " " &&
-        document.activeElement?.tagName !==
-          "INPUT"
-      ) {
-
-        e.preventDefault();
-
-
-        stopDrive();
-
-      }
-
-    }
-  );
-
-
-  window.addEventListener(
-    "keyup",
-    e => {
-
-      const cmd =
-        keys.get(e.key);
-
-
-      if (cmd) {
-
-        const btn =
-          document.querySelector(
-            `[data-command="${cmd}"]`
-          );
-
-
-        if (btn) {
-
-          btn.dispatchEvent(
-            new PointerEvent(
-              "pointerup",
-              {
-                bubbles: true
-              }
-            )
-          );
-
-        }
-
-      }
-
-    }
-  );
-
-
-  // =====================================================
-  // SAFETY
-  // STOP ROBOT IF PAGE LOSES FOCUS
-  // =====================================================
-
-  window.addEventListener(
-    "blur",
-    stopDrive
-  );
-
-
-  document.addEventListener(
-    "visibilitychange",
-    () => {
-
-      if (
-        document.hidden
-      ) {
-
-        stopDrive();
-
-      }
-
-    }
-  );
-
-
-  // =====================================================
-  // INITIAL STATE
-  // =====================================================
-
-  setView(
-    "camera"
-  );
-
-
-  if ($("speedSlider")) {
-
-    $("speedSlider").value =
-      speed;
-
-  }
-
-
-  if ($("speedValue")) {
-
-    $("speedValue").textContent =
-      `${speed}%`;
-
-  }
-
+  const speedValue = $("speedValue");
+  if (speedValue) speedValue.textContent = `${speed}%`;
 
   updateSensorState();
 
-
   if (baseUrl) {
-
-  log(
-    `Saved ESP32-S3 URL: ${baseUrl}`
-  );
-
-}
+    log(`Saved ESP32-S3 URL: ${baseUrl}`);
+  }
 
 })();
