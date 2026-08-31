@@ -566,3 +566,19 @@ and (orientation: landscape) {
 #estopBtn:active {
     transform: scale(0.98);
 }
+
+/* =========================================================
+   PHONE LANDSCAPE — keep Movement/Functions side-by-side
+   even below the md (768px) breakpoint, since phones in
+   landscape are often narrower than that but still have
+   plenty of width to work with once stacked vertically.
+   The compound selector (main.grid-cols-1) is more specific
+   than Tailwind's own .grid-cols-1 rule, so this wins without
+   needing !important or any change to the HTML classes.
+   ========================================================= */
+
+@media (orientation: landscape) and (max-width: 900px) {
+    main.grid-cols-1 {
+        grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    }
+}
