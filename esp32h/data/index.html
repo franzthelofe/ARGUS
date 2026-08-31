@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ARGUS Controller</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                            "tertiary-container": "#00d2fe",
+                            "surface-container-highest": "#333538",
+                            "on-tertiary": "#003543",
+                            "primary-fixed": "#ffdeac",
+                            "emergency-red": "#C53030",
+                            "surface-container-high": "#282a2d",
+                            "primary-container": "#ffb300",
+                            "surface-container": "#1e2023",
+                            "surface-variant": "#333538",
+                            "on-error": "#690005",
+                            "on-background": "#e2e2e6",
+                            "on-primary-container": "#6b4900",
+                            "text-dim": "#A0AEC0",
+                            "secondary-container": "#3c475a",
+                            "on-secondary-container": "#aab6cc",
+                            "secondary-fixed": "#d8e3fa",
+                            "primary-fixed-dim": "#ffba38",
+                            "secondary": "#bcc7dd",
+                            "on-primary": "#432c00",
+                            "secondary-fixed-dim": "#bcc7dd",
+                            "inverse-surface": "#e2e2e6",
+                            "inverse-on-surface": "#2f3034",
+                            "on-tertiary-fixed-variant": "#004e60",
+                            "on-error-container": "#ffdad6",
+                            "surface-container-low": "#1a1c1f",
+                            "surface-panel": "#2A2E35",
+                            "on-surface": "#e2e2e6",
+                            "on-surface-variant": "#d6c4ac",
+                            "tertiary": "#a4e7ff",
+                            "on-secondary-fixed-variant": "#3c475a",
+                            "outline": "#9e8e78",
+                            "on-secondary": "#263142",
+                            "primary": "#ffd79b",
+                            "surface-container-lowest": "#0c0e11",
+                            "outline-variant": "#514532",
+                            "surface-tint": "#ffba38",
+                            "on-tertiary-container": "#00566a",
+                            "surface-dim": "#111316",
+                            "surface": "#111316",
+                            "tertiary-fixed": "#b5ebff",
+                            "on-tertiary-fixed": "#001f28",
+                            "surface-bright": "#37393d",
+                            "background": "#111316",
+                            "border-subtle": "#3F444E",
+                            "on-secondary-fixed": "#111c2c",
+                            "error": "#ffb4ab",
+                            "error-container": "#93000a",
+                            "inverse-primary": "#7e5700",
+                            "tertiary-fixed-dim": "#43d6ff",
+                            "on-primary-fixed-variant": "#604100",
+                            "on-primary-fixed": "#281900"
+                    },
+                    "borderRadius": {
+                            "DEFAULT": "0.125rem",
+                            "lg": "0.25rem",
+                            "xl": "0.5rem",
+                            "full": "0.75rem"
+                    },
+                    "spacing": {
+                            "unit": "4px",
+                            "margin": "16px",
+                            "panel-padding": "12px",
+                            "gutter": "8px"
+                    },
+                    "fontFamily": {
+                            "body-md": [
+                                    "Inter"
+                            ],
+                            "data-mono": [
+                                    "JetBrains Mono"
+                            ],
+                            "body-lg": [
+                                    "Inter"
+                            ],
+                            "headline-lg-mobile": [
+                                    "JetBrains Mono"
+                            ],
+                            "label-caps": [
+                                    "JetBrains Mono"
+                            ],
+                            "headline-md": [
+                                    "JetBrains Mono"
+                            ],
+                            "headline-lg": [
+                                    "JetBrains Mono"
+                            ]
+                    },
+                    "fontSize": {
+                            "body-md": [
+                                    "14px",
+                                    {
+                                            "lineHeight": "20px",
+                                            "fontWeight": "400"
+                                    }
+                            ],
+                            "data-mono": [
+                                    "14px",
+                                    {
+                                            "lineHeight": "16px",
+                                            "fontWeight": "500"
+                                    }
+                            ],
+                            "body-lg": [
+                                    "16px",
+                                    {
+                                            "lineHeight": "24px",
+                                            "fontWeight": "400"
+                                    }
+                            ],
+                            "headline-lg-mobile": [
+                                    "20px",
+                                    {
+                                            "lineHeight": "28px",
+                                            "fontWeight": "700"
+                                    }
+                            ],
+                            "label-caps": [
+                                    "12px",
+                                    {
+                                            "lineHeight": "16px",
+                                            "letterSpacing": "0.05em",
+                                            "fontWeight": "700"
+                                    }
+                            ],
+                            "headline-md": [
+                                    "18px",
+                                    {
+                                            "lineHeight": "24px",
+                                            "fontWeight": "600"
+                                    }
+                            ],
+                            "headline-lg": [
+                                    "24px",
+                                    {
+                                            "lineHeight": "32px",
+                                            "letterSpacing": "-0.02em",
+                                            "fontWeight": "700"
+                                    }
+                            ]
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="min-h-screen w-full flex flex-col font-data-mono text-body-md overflow-x-hidden overflow-y-auto bg-surface-dim">
+<!-- TopAppBar Semantic Shell -->
+<header class="flex justify-between items-center w-full px-6 py-2 h-16 border-b border-border-subtle bg-surface-panel shrink-0 z-50">
+<div class="flex items-center gap-4">
+<h1 class="font-data-mono text-xl font-bold text-primary-container tracking-[0.2em] uppercase m-0 leading-none">ARGUS</h1>
+<span class="font-data-mono text-[10px] text-text-dim uppercase tracking-wider translate-y-0.5">SEARCH &amp; RESCUE ROBOT CONTROLLER</span>
+</div>
+<div class="flex items-center gap-3">
+<button id="connectBtn" class="control-btn px-3 py-1.5 rounded font-data-mono text-[11px] text-primary-container font-bold uppercase" type="button">CONNECT</button>
+<div id="connectionBadge" class="flex items-center gap-2 font-data-mono text-[12px] text-primary-container font-bold bg-surface-container px-3 py-1.5 rounded border border-emergency-red/30 shadow-[0_0_8px_rgba(197,48,48,0.2)]">
+<span class="text-emergency-red animate-pulse">●</span>
+<span id="connectionText">[ DISCONNECTED ]</span>
+</div>
+<div class="flex items-center gap-3 font-data-mono text-[12px] text-text-dim bg-surface-container px-3 py-1.5 rounded border border-border-subtle">
+<span>BATTERY</span>
+<span id="batteryValue" class="text-on-surface font-bold tracking-widest">--%</span>
+</div>
+</div>
+</header>
+<!-- Main Workspace -->
+<main class="flex-1 flex flex-col lg:flex-row w-full p-4 sm:p-6 gap-6 overflow-visible relative"><div class="absolute inset-0 grid-bg pointer-events-none"></div>
+<!-- Left Panel: Movement (40%) -->
+<section class="w-[40%] bg-surface-panel panel-border rounded flex flex-col p-6 relative z-10 shadow-lg">
+<div class="flex items-center justify-between mb-8 pb-3 border-b border-border-subtle">
+<div class="flex items-center gap-3">
+<span aria-hidden="true" class="material-symbols-outlined text-text-dim text-sm" data-icon="gamepad">gamepad</span>
+<h2 class="font-data-mono text-[12px] tracking-wider text-text-dim uppercase">MOVEMENT CONTROL</h2>
+</div>
+</div>
+<!-- Directional Pad -->
+<div class="flex-1 flex flex-col items-center justify-center py-4">
+<div class="relative w-[300px] h-[300px]">
+<!-- Forward -->
+<button id="forwardBtn" data-command="forward" aria-label="Forward" class="control-btn drive-btn absolute top-0 left-1/2 -translate-x-1/2 w-24 h-24 rounded flex flex-col items-center justify-center group focus:outline-none" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-text-dim group-active:text-primary-container transition-colors text-4xl" data-icon="keyboard_arrow_up">keyboard_arrow_up</span>
+</button>
+<!-- Left -->
+<button id="leftBtn" data-command="left" aria-label="Left" class="control-btn drive-btn absolute top-1/2 left-0 -translate-y-1/2 w-24 h-24 rounded flex items-center justify-center group focus:outline-none" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-text-dim group-active:text-primary-container transition-colors text-4xl" data-icon="keyboard_arrow_left">keyboard_arrow_left</span>
+</button>
+<!-- Stop -->
+<button id="stopBtn" data-command="stop" aria-label="Stop" class="control-btn drive-btn absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded flex flex-col items-center justify-center group focus:outline-none border-2 border-border-subtle active:border-primary-container shadow-inner bg-surface-container-low" type="button">
+<div class="w-8 h-8 bg-text-dim/80 rounded-sm group-active:bg-primary-container transition-colors shadow-sm"></div>
+</button>
+<!-- Right -->
+<button id="rightBtn" data-command="right" aria-label="Right" class="control-btn drive-btn absolute top-1/2 right-0 -translate-y-1/2 w-24 h-24 rounded flex items-center justify-center group focus:outline-none" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-text-dim group-active:text-primary-container transition-colors text-4xl" data-icon="keyboard_arrow_right">keyboard_arrow_right</span>
+</button>
+<!-- Reverse -->
+<button id="reverseBtn" data-command="reverse" aria-label="Reverse" class="control-btn drive-btn absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-24 rounded flex flex-col items-center justify-center group focus:outline-none" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-text-dim group-active:text-primary-container transition-colors text-4xl" data-icon="keyboard_arrow_down">keyboard_arrow_down</span>
+</button>
+</div>
+</div>
+<!-- Speed Slider -->
+<div class="mt-8 bg-surface-container p-5 rounded border border-border-subtle shadow-inner">
+<div class="flex justify-between items-center mb-6">
+<span class="font-data-mono text-[12px] tracking-wider text-text-dim">SPEED LIMITER</span>
+<span id="speedValue" class="font-data-mono text-[14px] text-primary-container font-bold bg-surface-panel px-2 py-1 rounded border border-border-subtle">50%</span>
+</div>
+<input id="speedSlider" aria-label="Speed Control" class="w-full relative z-10" max="100" min="0" type="range" value="50"/>
+<div class="flex justify-between mt-3 px-1">
+<span class="font-data-mono text-[10px] text-text-dim tracking-widest">MIN</span>
+<span class="font-data-mono text-[10px] text-text-dim tracking-widest">MAX</span>
+</div>
+</div>
+<!-- E-STOP -->
+<button id="estopBtn" type="button" class="mt-6 w-full bg-surface-container-lowest text-emergency-red font-data-mono text-[14px] tracking-widest font-bold py-5 rounded border border-emergency-red/50 hover:bg-emergency-red/10 hover:border-emergency-red transition-all flex items-center justify-center gap-3 focus:outline-none active:bg-emergency-red active:text-white shadow-[inset_0_0_10px_rgba(197,48,48,0.1)]">
+<span aria-hidden="true" class="material-symbols-outlined text-lg" data-icon="warning">warning</span>
+    EMERGENCY STOP
+</button>
+</section>
+<!-- Right Panel: Functions (60%) -->
+<section class="w-[60%] flex flex-col gap-6 relative z-10 h-full">
+<!-- Sensor View Area -->
+<div class="bg-surface-panel panel-border rounded flex flex-col overflow-hidden shrink-0 shadow-lg">
+<div class="flex justify-between items-center px-4 py-2.5 border-b border-border-subtle bg-surface-dim">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-text-dim text-sm" data-icon="visibility">visibility</span>
+<span class="font-data-mono text-[12px] tracking-wider text-text-dim uppercase">SENSOR VIEW</span>
+</div>
+<span id="viewModeLabel" class="font-data-mono text-[10px] text-primary-container tracking-widest">CAMERA FEED</span>
+</div>
+<div id="sensorViewport" class="w-full aspect-video bg-surface-container-lowest relative flex items-center justify-center overflow-hidden border-b border-border-subtle">
+<div class="absolute inset-0 viewport-grid pointer-events-none"></div>
+<div class="absolute inset-0 crosshair pointer-events-none"></div>
+<img id="cameraFeed" class="absolute inset-0 w-full h-full object-contain hidden z-[2]" alt="ARGUS camera feed"/>
+<canvas id="thermalCanvas" class="absolute inset-0 w-full h-full hidden z-[2]" aria-label="MLX90640 thermal view"></canvas>
+<div id="sensorPlaceholder" class="flex flex-col items-center gap-4 z-10 p-6 bg-surface-panel/80 rounded border border-border-subtle backdrop-blur-sm">
+<span id="sensorPlaceholderIcon" aria-hidden="true" class="material-symbols-outlined text-5xl text-border-subtle" data-icon="videocam_off">videocam_off</span>
+<span id="sensorPlaceholderText" class="font-data-mono text-[14px] text-text-dim tracking-widest">WAITING FOR ESP32-S3</span>
+</div>
+<div id="thermalReadout" class="hidden absolute left-3 bottom-3 z-20 bg-surface-container-lowest/90 border border-border-subtle px-3 py-2 font-data-mono text-[10px] text-text-dim">
+<span>MAX <b id="thermalMax">--</b>°C</span>
+<span class="mx-2">|</span><span>CENTER <b id="thermalCenter">--</b>°C</span>
+<span class="mx-2">|</span><span>MIN <b id="thermalMin">--</b>°C</span>
+</div>
+</div>
+<!-- View Toggles -->
+<div class="flex items-center justify-center gap-4 p-4 bg-surface-container">
+<button id="cameraBtn" type="button" class="view-toggle px-8 py-3 rounded bg-surface-panel text-primary-container border border-primary-container/50 font-data-mono text-[12px] flex items-center gap-3 shadow-[0_0_10px_rgba(255,179,0,0.15)] transition-all">
+<span class="material-symbols-outlined text-[16px]">photo_camera</span> CAMERA
+</button>
+<button id="thermalBtn" type="button" class="view-toggle px-8 py-3 rounded bg-surface-container-lowest text-text-dim border border-border-subtle hover:border-text-dim/50 font-data-mono text-[12px] flex items-center gap-3 transition-all">
+<span class="material-symbols-outlined text-[16px]">device_thermostat</span> THERMAL
+</button>
+</div>
+</div>
+<!-- Compact Controls Grid -->
+<div class="grid grid-cols-4 gap-6 shrink-0">
+<!-- Mic -->
+<button id="micBtn" type="button" class="function-btn bg-surface-panel panel-border rounded p-4 flex flex-col items-center gap-3 relative shadow-md text-left">
+<span class="absolute top-2 left-2 font-data-mono text-[8px] text-border-subtle">INMP441</span>
+<span aria-hidden="true" class="material-symbols-outlined text-text-dim text-2xl mt-2" data-icon="mic_off">mic_off</span>
+<span class="font-data-mono text-[10px] text-text-dim uppercase text-center w-full border-b border-border-subtle pb-1.5 tracking-wider">MICROPHONE</span>
+<span id="micStatus" class="font-data-mono text-[10px] text-emergency-red font-bold">OFFLINE</span>
+</button>
+<!-- Speaker -->
+<button id="speakerBtn" type="button" class="function-btn bg-surface-panel panel-border rounded p-4 flex flex-col items-center gap-3 relative shadow-md text-left">
+<span class="absolute top-2 left-2 font-data-mono text-[8px] text-border-subtle">MAX98357A</span>
+<span aria-hidden="true" class="material-symbols-outlined text-text-dim text-2xl mt-2" data-icon="volume_off">volume_off</span>
+<span class="font-data-mono text-[10px] text-text-dim uppercase text-center w-full border-b border-border-subtle pb-1.5 tracking-wider">SPEAKER</span>
+<span id="speakerStatus" class="font-data-mono text-[10px] text-emergency-red font-bold">OFFLINE</span>
+</button>
+<!-- Light -->
+<button id="lightBtn" type="button" class="function-btn bg-surface-panel panel-border rounded p-4 flex flex-col items-center gap-3 relative shadow-md text-left">
+<span class="absolute top-2 left-2 font-data-mono text-[8px] text-border-subtle">MLX90640</span>
+<span aria-hidden="true" class="material-symbols-outlined text-text-dim text-2xl mt-2" data-icon="lightbulb">lightbulb</span>
+<span class="font-data-mono text-[10px] text-text-dim uppercase text-center w-full border-b border-border-subtle pb-1.5 tracking-wider">LIGHT</span>
+<span id="lightStatus" class="font-data-mono text-[10px] text-text-dim font-bold">OFF</span>
+</button>
+<!-- BT -->
+<button id="bluetoothBtn" type="button" class="function-btn bg-surface-panel panel-border rounded p-4 flex flex-col items-center gap-3 relative shadow-md text-left">
+<span class="absolute top-2 left-2 font-data-mono text-[8px] text-border-subtle">ESP32-S3</span>
+<span aria-hidden="true" class="material-symbols-outlined text-text-dim text-2xl mt-2" data-icon="bluetooth_disabled">bluetooth_disabled</span>
+<span class="font-data-mono text-[10px] text-text-dim uppercase text-center w-full border-b border-border-subtle pb-1.5 tracking-wider">BLUETOOTH</span>
+<span id="bluetoothStatus" class="font-data-mono text-[10px] text-emergency-red font-bold">DISCONNECTED</span>
+</button>
+</div>
+<!-- System Readout -->
+<div class="bg-surface-panel panel-border rounded flex-1 flex flex-col min-h-0 shadow-lg">
+<div class="flex justify-between items-center px-4 py-2.5 border-b border-border-subtle bg-surface-dim">
+<div class="flex items-center gap-3">
+<span aria-hidden="true" class="material-symbols-outlined text-text-dim text-sm" data-icon="terminal">terminal</span>
+<h2 class="font-data-mono text-[12px] tracking-wider text-text-dim uppercase">SYSTEM READOUT</h2>
+</div>
+<button id="clearConsole" aria-label="Clear Console" class="text-text-dim hover:text-primary-container transition-colors focus:outline-none">
+<span aria-hidden="true" class="material-symbols-outlined text-[16px]" data-icon="delete">delete</span>
+</button>
+</div>
+<div
+    id="systemConsole"
+    class="h-48 sm:h-56 lg:h-64 bg-surface-container-lowest p-5 font-data-mono text-[11px] leading-[1.8] text-text-dim overflow-y-auto overflow-x-hidden overscroll-contain"
+><div class="mb-1"><span class="text-text-dim/50 mr-2">[BOOT]</span> &gt; ARGUS controller ready.</div>
+<div class="mb-1"><span class="text-text-dim/50 mr-2">[LINK]</span> &gt; Waiting for ESP32-S3 N16R8.</div>
+<div class="mt-2 text-primary-container animate-pulse">_</div>
+</div>
+</div>
+</section>
+</main>
+
+<!-- ARGUS connection setup -->
+<div id="connectionModal" class="hidden fixed inset-0 z-[100] bg-black/70 items-center justify-center">
+  <div class="w-[min(92vw,520px)] bg-surface-panel panel-border rounded p-6 shadow-2xl">
+    <div class="flex justify-between items-center mb-5">
+      <h2 class="font-data-mono text-[13px] tracking-wider text-primary-container uppercase">ESP32-S3 CONNECTION</h2>
+      <button id="closeConnection" type="button" class="text-text-dim hover:text-white text-xl">×</button>
+    </div>
+    <label class="block font-data-mono text-[10px] text-text-dim tracking-wider mb-2">ESP32 BASE URL</label>
+    <input id="esp32Url" class="w-full bg-surface-container-lowest border border-border-subtle rounded px-3 py-3 font-data-mono text-[12px] text-on-surface focus:border-primary-container focus:ring-0" placeholder="http://192.168.4.1" value="">
+    <p class="mt-3 font-data-mono text-[10px] text-text-dim leading-relaxed">
+      The browser connects to the ESP32-S3 over Wi-Fi. The ESP32-S3 can then relay drive commands to the HM-10 → STM32 → motor driver.
+    </p>
+    <div class="flex justify-end gap-3 mt-5">
+      <button id="cancelConnection" type="button" class="control-btn px-4 py-2 rounded font-data-mono text-[11px]">CANCEL</button>
+      <button id="saveConnection" type="button" class="control-btn px-4 py-2 rounded font-data-mono text-[11px] text-primary-container">CONNECT</button>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body></html>

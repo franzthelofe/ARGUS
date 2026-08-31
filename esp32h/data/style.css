@@ -1,0 +1,272 @@
+/* =========================================================
+   ARGUS MOBILE APP / SCROLL MODE
+   ========================================================= */
+
+html {
+    width: 100%;
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+}
+
+body {
+    width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    /* Prevent accidental text selection while controlling */
+    user-select: none;
+    -webkit-user-select: none;
+
+    /* Better touch controls */
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+/* Main application container */
+
+#app {
+    width: 100%;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+/* =========================================================
+   APP SCROLL CONTAINER
+   ========================================================= */
+
+.app-scroll {
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    box-sizing: border-box;
+
+    padding-bottom: 30px;
+
+    -webkit-overflow-scrolling: touch;
+}
+
+/* =========================================================
+   SENSOR VIEW
+   ========================================================= */
+
+#sensorView,
+.sensor-view {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Camera / thermal screen */
+
+#cameraFeed,
+#thermalCanvas {
+    width: 100%;
+    height: auto;
+    max-height: 55vh;
+
+    object-fit: contain;
+
+    display: block;
+}
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+button {
+    touch-action: manipulation;
+}
+
+/* Movement buttons should feel like physical controls */
+
+.drive-btn {
+    touch-action: none;
+
+    -webkit-user-select: none;
+    user-select: none;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.08s ease,
+        background 0.12s ease,
+        border-color 0.12s ease;
+}
+
+.drive-btn:active,
+.drive-btn.is-held {
+    transform: scale(0.94);
+}
+
+/* =========================================================
+   MOBILE LAYOUT
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+    body {
+        font-size: 14px;
+    }
+
+    .app-scroll {
+        padding: 8px;
+        padding-bottom: 40px;
+    }
+
+    /* Make major panels stack */
+
+    .main-layout,
+    .controller-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    /* Sensor view first */
+
+    .sensor-panel {
+        width: 100%;
+        order: 1;
+    }
+
+    /* Movement controls */
+
+    .movement-panel {
+        width: 100%;
+        order: 2;
+    }
+
+    /* Functional controls */
+
+    .function-panel {
+        width: 100%;
+        order: 3;
+    }
+
+    /* System readout */
+
+    .system-panel {
+        width: 100%;
+        order: 4;
+    }
+
+    /* Sensor screen */
+
+    #cameraFeed,
+    #thermalCanvas {
+        max-height: 45vh;
+    }
+
+}
+
+/* =========================================================
+   PHONE
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+    .app-scroll {
+        padding: 6px;
+    }
+
+    #cameraFeed,
+    #thermalCanvas {
+        max-height: 38vh;
+    }
+
+    /* Make movement buttons larger */
+
+    .drive-btn {
+        min-width: 58px;
+        min-height: 58px;
+    }
+
+    /* Make functional buttons easier to touch */
+
+    .function-btn {
+        min-height: 58px;
+    }
+
+    /* Keep emergency stop easy to hit */
+
+    #estopBtn {
+        min-height: 60px;
+        width: 100%;
+    }
+
+}
+
+/* =========================================================
+   TABLET / LANDSCAPE
+   ========================================================= */
+
+@media (min-width: 769px) {
+
+    .app-scroll {
+        padding: 14px;
+    }
+
+    .main-layout,
+    .controller-layout {
+        display: grid;
+
+        grid-template-columns:
+            minmax(280px, 0.8fr)
+            minmax(450px, 1.5fr);
+
+        gap: 14px;
+
+        align-items: start;
+    }
+
+}
+
+/* =========================================================
+   LANDSCAPE PHONE
+   ========================================================= */
+
+@media
+(max-width: 900px)
+and (orientation: landscape) {
+
+    #cameraFeed,
+    #thermalCanvas {
+        max-height: 65vh;
+    }
+
+    .app-scroll {
+        padding-bottom: 30px;
+    }
+
+}
+/* =========================================================
+   ARGUS SYSTEM CONSOLE
+   The console scrolls independently from the application.
+   ========================================================= */
+
+#systemConsole {
+    height: 12rem;
+    max-height: 12rem;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    overscroll-behavior: contain;
+
+    scrollbar-width: thin;
+
+    scroll-behavior: auto;
+}
+
+/* Prevent the console from expanding the page */
+
+#systemConsole > div {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}

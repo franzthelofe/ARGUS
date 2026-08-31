@@ -1,9 +1,46 @@
 // wifi_hdl.cpp
 
 #include "wifi_hdl.h"
+
+#define LOG_BUF_LINES 40
+
 #include <LittleFS.h>
 
+static String logBuf[LOG_BUF_LINES];
+static int logIndex = 0;
+
 WebServer server(80);
+
+void logPrintln(const String &msg)
+{
+    Serial.println(msg);   // still prints over USB when it's plugged in
+    logBuf[logIndex] = msg;
+    logIndex = (logIndex + 1) % LOG_BUF_LINES;
+}
+
+static void handleLog()
+{
+    String out;
+    for (int i = 0; i < LOG_BUF_LINES; i++)
+    {
+        int idx = (logIndex + i) % LOG_BUF_LINES;
+        if (logBuf[idx].length())
+            out += logBuf[idx] + "\n";
+    }
+    server.send(200, "text/plain", out);
+}
+
+static void handleCSS()
+{
+    File f = LittleFS.open("/style.css", "r");
+    if (!f)
+    {
+        server.send(404, "text/plain", "not found");
+        return;
+    }
+    server.streamFile(f, "text/css");   // force the correct MIME type
+    f.close();
+}
 
 static void handleColor()
 {
@@ -44,7 +81,7 @@ static void handleRGB()
     if (!server.hasArg("r") || !server.hasArg("g") || !server.hasArg("b"))
     {
         server.send(400, "text/plain", "missing r/g/b");
-        
+
         return;
     }
 
@@ -66,39 +103,52 @@ void setupServerRoutes(void)
         return;
     }
 
+    File root = LittleFS.open("/");
+    File f = root.openNextFile();
+    while (f)
+    {
+        Serial.printf("FOUND: %s (%d bytes)\n", f.name(), f.size());
+        f = root.openNextFile();
+    }
+
+    server.on("/style.css", handleCSS);
+
     server.serveStatic("/", LittleFS, "/index.html");
-    server.serveStatic("/style.css", LittleFS, "/style.css");
     server.serveStatic("/script.js", LittleFS, "/script.js");
 
     server.on("/color", handleColor);
     server.on("/rgb", handleRGB);
+
+    server.on("/log", handleLog);
 
     server.begin();
 }
 
 void setupWIFI(const char *ssid, const char *pass)
 {
-    WiFi.begin(ssid, pass);
+    LEDColor(B4);
+    LEDShow();
 
-    int i = 0;
+    bool started = WiFi.softAP(ssid, pass);
 
-    while (WiFi.status() != WL_CONNECTED)
+    if (!started)
     {
-        delay(500);
-
-        switch (i)
-        {
-            case 0: LEDColor(B4); LEDShow(); i++; break;
-            case 1: LEDColor(B3); LEDShow(); i++; break;
-            case 2: LEDColor(B2); LEDShow(); i++; break;
-            case 3: LEDColor(B1_); LEDShow(); i -= 3; break;
-        }
+        Serial.println("Failed to start AP!");
+        LEDColor(R1);
+        LEDShow();
+        return;
     }
 
-    Serial.println(WiFi.localIP());
+    IPAddress ip = WiFi.softAPIP();
+
+    logPrintln("AP started: " + String(ssid));
+    logPrintln("Browse to: http://" + ip.toString());
+    
     LEDColor(G1);
     LEDShow();
     delay(500);
 
     setupServerRoutes();
+
+    //  LittleFS.open("/");
 }

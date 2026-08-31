@@ -23,6 +23,8 @@ void setup()
 
 void loop()
 {
+     server.handleClient();
+     
     unsigned long currMillis = millis();
 
     if (currMillis - prevMillis >= interval)
