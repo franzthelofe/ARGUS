@@ -19,7 +19,6 @@
 */
 
 (() => {
-
   // =====================================================
   // CONNECTION VARIABLES
   // =====================================================
@@ -65,12 +64,13 @@
 
     const line = document.createElement("div");
     line.className =
-      level === "error" ? "mb-1 text-emergency-red" :
-      level === "warn"  ? "mb-1 text-primary-container" :
-                          "mb-1";
+      level === "error"
+        ? "mb-1 text-emergency-red"
+        : level === "warn"
+          ? "mb-1 text-primary-container"
+          : "mb-1";
 
-    line.innerHTML =
-      `<span class="text-text-dim/50 mr-2">[${escapeHtml(now())}]</span> &gt; ${escapeHtml(message)}`;
+    line.innerHTML = `<span class="text-text-dim/50 mr-2">[${escapeHtml(now())}]</span> &gt; ${escapeHtml(message)}`;
 
     const oldCursor = consoleEl.querySelector(".argus-console-cursor");
     if (oldCursor) oldCursor.remove();
@@ -78,7 +78,8 @@
     consoleEl.appendChild(line);
 
     const cursor = document.createElement("div");
-    cursor.className = "argus-console-cursor mt-2 text-primary-container animate-pulse";
+    cursor.className =
+      "argus-console-cursor mt-2 text-primary-container animate-pulse";
     cursor.textContent = "_";
     consoleEl.appendChild(cursor);
 
@@ -176,7 +177,13 @@
 
       socket.onopen = () => {
         setConnectionState(true, `WebSocket connected: ${wsUrl}`);
-        socket.send(JSON.stringify({ type: "hello", client: "ARGUS-WEB", version: "3.0" }));
+        socket.send(
+          JSON.stringify({
+            type: "hello",
+            client: "ARGUS-WEB",
+            version: "3.0",
+          }),
+        );
         updateSensorState();
       };
 
@@ -250,7 +257,10 @@
 
       setConnectionState(true, "ESP32-S3 HTTP link responding.");
     } catch (e) {
-      log(`HTTP status check failed: ${e.message}. Trying WebSocket...`, "warn");
+      log(
+        `HTTP status check failed: ${e.message}. Trying WebSocket...`,
+        "warn",
+      );
     }
 
     connectSocket();
@@ -291,7 +301,10 @@
       if (icon) icon.textContent = connected ? "videocam" : "videocam_off";
 
       const text = $("sensorPlaceholderText");
-      if (text) text.textContent = connected ? "WAITING FOR CAMERA STREAM" : "WAITING FOR ESP32-S3";
+      if (text)
+        text.textContent = connected
+          ? "WAITING FOR CAMERA STREAM"
+          : "WAITING FOR ESP32-S3";
 
       if (connected && baseUrl) {
         const stream = `${baseUrl}/stream`;
@@ -320,7 +333,10 @@
       if (icon) icon.textContent = "device_thermostat";
 
       const text = $("sensorPlaceholderText");
-      if (text) text.textContent = connected ? "WAITING FOR MLX90640" : "WAITING FOR ESP32-S3";
+      if (text)
+        text.textContent = connected
+          ? "WAITING FOR MLX90640"
+          : "WAITING FOR ESP32-S3";
 
       if (connected) pollThermal();
     }
@@ -352,13 +368,19 @@
 
     if (cameraBtn) {
       cameraBtn.classList.toggle("text-primary-container", view === "camera");
-      cameraBtn.classList.toggle("border-primary-container/50", view === "camera");
+      cameraBtn.classList.toggle(
+        "border-primary-container/50",
+        view === "camera",
+      );
       cameraBtn.classList.toggle("bg-surface-panel", view === "camera");
     }
 
     if (thermalBtn) {
       thermalBtn.classList.toggle("text-primary-container", view === "thermal");
-      thermalBtn.classList.toggle("border-primary-container/50", view === "thermal");
+      thermalBtn.classList.toggle(
+        "border-primary-container/50",
+        view === "thermal",
+      );
       thermalBtn.classList.toggle("bg-surface-panel", view === "thermal");
     }
 
@@ -426,11 +448,11 @@
 
     // Blue -> Cyan -> Green -> Yellow -> Red
     const stops = [
-      [0,    20, 70,  180],
-      [0.25,  0, 190, 255],
-      [0.5,  40, 210, 100],
+      [0, 20, 70, 180],
+      [0.25, 0, 190, 255],
+      [0.5, 40, 210, 100],
       [0.75, 255, 220, 0],
-      [1,    230, 40, 30],
+      [1, 230, 40, 30],
     ];
 
     for (let i = 0; i < stops.length - 1; i++) {
@@ -468,8 +490,12 @@
     const vals = pixels.slice(0, 768).map(Number).filter(Number.isFinite);
     if (!vals.length) return;
 
-    const min = Number.isFinite(Number(minHint)) ? Number(minHint) : Math.min(...vals);
-    const max = Number.isFinite(Number(maxHint)) ? Number(maxHint) : Math.max(...vals);
+    const min = Number.isFinite(Number(minHint))
+      ? Number(minHint)
+      : Math.min(...vals);
+    const max = Number.isFinite(Number(maxHint))
+      ? Number(maxHint)
+      : Math.max(...vals);
 
     const tmp = document.createElement("canvas");
     const tw = 32;
@@ -482,7 +508,9 @@
 
     for (let y = 0; y < 24; y++) {
       for (let x = 0; x < 32; x++) {
-        const color = thermalColor(vals[y * 32 + x], min, max).match(/\d+/g).map(Number);
+        const color = thermalColor(vals[y * 32 + x], min, max)
+          .match(/\d+/g)
+          .map(Number);
         const i = (y * 32 + x) * 4;
 
         image.data[i] = color[0];
@@ -503,7 +531,9 @@
     if (thermalMax) thermalMax.textContent = Number(maxHint ?? max).toFixed(1);
     if (thermalMin) thermalMin.textContent = Number(minHint ?? min).toFixed(1);
 
-    const center = Number.isFinite(Number(centerHint)) ? Number(centerHint) : vals[12 * 32 + 16];
+    const center = Number.isFinite(Number(centerHint))
+      ? Number(centerHint)
+      : vals[12 * 32 + 16];
     if (thermalCenter) thermalCenter.textContent = center.toFixed(1);
 
     const placeholder = $("sensorPlaceholder");
@@ -538,9 +568,12 @@
 
     activeDrive = command;
 
-    document.querySelectorAll(".drive-btn").forEach((b) => b.classList.remove("is-held"));
+    document
+      .querySelectorAll(".drive-btn")
+      .forEach((b) => b.classList.remove("is-held"));
 
-    const btn = triggerBtn || document.querySelector(`[data-command="${command}"]`);
+    const btn =
+      triggerBtn || document.querySelector(`[data-command="${command}"]`);
     if (btn) btn.classList.add("is-held");
 
     sendCommand(command);
@@ -557,7 +590,9 @@
 
   function stopDrive() {
     activeDrive = null;
-    document.querySelectorAll(".drive-btn").forEach((b) => b.classList.remove("is-held"));
+    document
+      .querySelectorAll(".drive-btn")
+      .forEach((b) => b.classList.remove("is-held"));
     sendCommand("stop");
   }
 
@@ -575,7 +610,11 @@
       if (pointerId !== null) return; // already held by another pointer
 
       pointerId = e.pointerId;
-      try { btn.setPointerCapture(pointerId); } catch (_) { /* ignore */ }
+      try {
+        btn.setPointerCapture(pointerId);
+      } catch (_) {
+        /* ignore */
+      }
 
       startDrive(command, btn);
     };
@@ -584,7 +623,11 @@
       if (e) e.preventDefault();
       if (pointerId === null) return;
 
-      try { btn.releasePointerCapture(pointerId); } catch (_) { /* ignore */ }
+      try {
+        btn.releasePointerCapture(pointerId);
+      } catch (_) {
+        /* ignore */
+      }
       pointerId = null;
 
       releaseDrive(command);
@@ -636,10 +679,14 @@
   // =====================================================
 
   const keys = new Map([
-    ["ArrowUp", "forward"], ["w", "forward"],
-    ["ArrowDown", "reverse"], ["s", "reverse"],
-    ["ArrowLeft", "left"], ["a", "left"],
-    ["ArrowRight", "right"], ["d", "right"],
+    ["ArrowUp", "forward"],
+    ["w", "forward"],
+    ["ArrowDown", "reverse"],
+    ["s", "reverse"],
+    ["ArrowLeft", "left"],
+    ["a", "left"],
+    ["ArrowRight", "right"],
+    ["d", "right"],
   ]);
 
   window.addEventListener("keydown", (e) => {
@@ -685,7 +732,9 @@
   // -- connection modal --
   const connectBtn = $("connectBtn");
   if (connectBtn) {
-    connectBtn.addEventListener("click", () => (connected ? disconnect() : connect()));
+    connectBtn.addEventListener("click", () =>
+      connected ? disconnect() : connect(),
+    );
   }
 
   const closeConnection = $("closeConnection");
@@ -751,12 +800,31 @@
   if (cameraBtn) cameraBtn.addEventListener("click", () => setView("camera"));
 
   const thermalBtn = $("thermalBtn");
-  if (thermalBtn) thermalBtn.addEventListener("click", () => setView("thermal"));
+  if (thermalBtn)
+    thermalBtn.addEventListener("click", () => setView("thermal"));
 
   // -- microphone / speaker / light --
-  bindToggle("micBtn", () => micOn, (v) => (micOn = v), "microphone", "micStatus");
-  bindToggle("speakerBtn", () => speakerOn, (v) => (speakerOn = v), "speaker", "speakerStatus");
-  bindToggle("lightBtn", () => lightOn, (v) => (lightOn = v), "light", "lightStatus");
+  bindToggle(
+    "micBtn",
+    () => micOn,
+    (v) => (micOn = v),
+    "microphone",
+    "micStatus",
+  );
+  bindToggle(
+    "speakerBtn",
+    () => speakerOn,
+    (v) => (speakerOn = v),
+    "speaker",
+    "speakerStatus",
+  );
+  bindToggle(
+    "lightBtn",
+    () => lightOn,
+    (v) => (lightOn = v),
+    "light",
+    "lightStatus",
+  );
 
   // -- bluetooth (informational only — link is ESP32-S3 -> HM-10 -> STM32) --
   const bluetoothBtn = $("bluetoothBtn");
@@ -771,7 +839,8 @@
   if (clearConsole) {
     clearConsole.addEventListener("click", () => {
       if (consoleEl) {
-        consoleEl.innerHTML = '<div class="mt-2 text-primary-container animate-pulse">_</div>';
+        consoleEl.innerHTML =
+          '<div class="mt-2 text-primary-container animate-pulse">_</div>';
       }
     });
   }
@@ -789,5 +858,4 @@
   if (baseUrl) {
     log(`Saved ESP32-S3 URL: ${baseUrl}`);
   }
-
 })();
