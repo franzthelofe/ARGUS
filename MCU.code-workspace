@@ -1,10 +1,10 @@
 {
 	"folders": [
 		{
-			"path": "stm32b"
+			"path": "firmware/stm"
 		},
 		{
-			"path": "esp32h"
+			"path": "firmware/esp"
 		}
 	],
 	"settings": {}
