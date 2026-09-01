@@ -11,6 +11,8 @@
 
 extern WebServer server;
 
+void logPrintln(const String &msg);
+
 void setupWIFI(const char *ssid, const char *pass);
 
 void setupServerRoutes(void);
