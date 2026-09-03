@@ -1,0 +1,27 @@
+// bt_hdl.cpp
+
+#include "bt_hdl.h.obsolete"
+
+SoftwareSerial btSerial(RXD_PIN, TXD_PIN);
+
+void btSetupPin(void)
+{
+    pinMode(RXD_PIN, INPUT);
+    pinMode(TXD_PIN, OUTPUT);
+}
+
+void btSerialInit(void) { btSerial.begin(9600); }
+
+int btSerialRead(void)
+{
+    if (btSerial.available()) {
+        return btSerial.read();
+    }
+
+    return -1;
+}
+
+void btSerialWrite(const char *msg)
+{
+    btSerial.print(msg);
+}

@@ -14,7 +14,17 @@
         <h1 class="brand">ARGUS</h1>
         <span class="subtitle">SEARCH &amp; RESCUE ROBOT CONTROLLER</span>
       </div>
-      
+
+      <div class="top-actions">
+        <button id="connectBtn" class="control-btn small-btn" type="button">
+          CONNECT
+        </button>
+
+        <div id="connectionBadge" class="connection-badge">
+          <span class="connection-dot">●</span>
+          <span id="connectionText">[ DISCONNECTED ]</span>
+        </div>
+
         <div class="battery-box">
           <span>BATTERY</span>
           <span id="batteryValue" class="battery-value">--%</span>
@@ -39,6 +49,7 @@
               aria-label="Forward"
               class="control-btn drive-btn dpad-up"
               type="button"
+              onclick="toEmbedded('W')"
             >
               <span class="arrow">▲</span>
             </button>
@@ -49,6 +60,7 @@
               aria-label="Left"
               class="control-btn drive-btn dpad-left"
               type="button"
+              onclick="toEmbedded('A')"
             >
               <span class="arrow">◀</span>
             </button>
@@ -58,7 +70,8 @@
               data-command="stop"
               aria-label="Stop"
               class="control-btn drive-btn dpad-stop"
-              type="button"            
+              type="button"
+              onclick="toEmbedded('X')"
             >
               <span class="stop-square"></span>
             </button>
@@ -69,6 +82,7 @@
               aria-label="Right"
               class="control-btn drive-btn dpad-right"
               type="button"
+              onclick="toEmbedded('D')"
             >
               <span class="arrow">▶</span>
             </button>
@@ -79,6 +93,7 @@
               aria-label="Reverse"
               class="control-btn drive-btn dpad-down"
               type="button"
+              onclick="toEmbedded('S')"
             >
               <span class="arrow">▼</span>
             </button>
@@ -107,6 +122,10 @@
           </div>
         </div>
 
+        <button id="estopBtn" type="button" class="estop-btn">
+          <span>⚠</span>
+          EMERGENCY STOP
+        </button>
       </section>
 
       <section class="functions-panel">
@@ -185,6 +204,14 @@
             <span id="lightStatus" class="function-status">OFF</span>
           </button>
 
+          <button id="bluetoothBtn" type="button" class="function-btn">
+            <span class="hardware-label">ESP32-S3</span>
+            <span class="function-icon">ᛒ</span>
+            <span class="function-title">BLUETOOTH</span>
+            <span id="bluetoothStatus" class="function-status offline"
+              >DISCONNECTED</span
+            >
+          </button>
         </div>
 
         <div class="panel system-panel">
