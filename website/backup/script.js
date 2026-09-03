@@ -17,7 +17,6 @@
    {"type":"ack","command":"forward"}
    {"type":"log","message":"HM-10 connected"}
 */
-<<<<<<< HEAD
 
 <<<<<<<< HEAD:website/src/script.js
 ========
@@ -33,43 +32,6 @@ function toEmbedded(cmd) {
 }
 
 >>>>>>>> head:website/backup/script.js
-=======
-// =====================================================
-// DATA TRANSMITTER
-// =====================================================
-
-function sendDirection(dirCMD, dirLR) {
-  const dirMap = { forward: 'F', reverse: 'R', stop: 'X' };
-
-  let body = '';
-
-  if (dirCMD !== null && dirCMD !== undefined) {
-    const dir = dirMap[dirCMD] || dirCMD;
-    body += 'dirCMD=' + encodeURIComponent(dir);
-  }
-
-  if (dirLR !== null && dirLR !== undefined) {
-    if (body) body += '&';
-    body += 'dirLR=' + encodeURIComponent(dirLR);
-  }
-
-  fetch('/dir', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body,
-  });
-}
-
-function sendSpeed(speed) {
-  const body = 'speed=' + encodeURIComponent(speed);
-  fetch('/speed', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body,
-  });
-}
-
->>>>>>> head
 (() => {
   // =====================================================
   // CONNECTION VARIABLES
@@ -80,10 +42,7 @@ function sendSpeed(speed) {
   let baseUrl = DEFAULT_ESP32.replace(/\/+$/, "");
   let socket = null;
   let connected = false;
-<<<<<<< HEAD
   let activeDrive = null;
-=======
->>>>>>> head
   let speed = 50;
   let currentView = "camera";
   let micOn = false;
@@ -193,7 +152,6 @@ function sendSpeed(speed) {
     return url.replace(/\/+$/, "");
   }
 
-<<<<<<< HEAD
   async function httpCommand(command, extra = {}) {
     if (!baseUrl) {
       log("No ESP32-S3 URL configured.", "warn");
@@ -219,8 +177,6 @@ function sendSpeed(speed) {
     }
   }
 
-=======
->>>>>>> head
   // =====================================================
   // WEBSOCKET
   // =====================================================
@@ -325,7 +281,6 @@ function sendSpeed(speed) {
     updateSensorState();
   }
 
-<<<<<<< HEAD
   function disconnect() {
     if (socket) {
       socket.close();
@@ -336,8 +291,6 @@ function sendSpeed(speed) {
     stopDrive();
   }
 
-=======
->>>>>>> head
   // =====================================================
   // CAMERA / THERMAL
   // =====================================================
@@ -421,7 +374,6 @@ function sendSpeed(speed) {
     }
   }
 
-<<<<<<< HEAD
   function setView(view) {
     currentView = view;
 
@@ -450,8 +402,6 @@ function sendSpeed(speed) {
     updateSensorState();
     log(`Sensor view: ${view.toUpperCase()}`);
   }
-=======
->>>>>>> head
 
   // =====================================================
   // PROCESS ESP32 MESSAGES
@@ -605,7 +555,6 @@ function sendSpeed(speed) {
   }
 
   // =====================================================
-<<<<<<< HEAD
   // GENERIC COMMAND SENDING
   // =====================================================
 
@@ -624,13 +573,10 @@ function sendSpeed(speed) {
   }
 
   // =====================================================
-=======
->>>>>>> head
   // MOVEMENT CONTROL
   // (single source of truth — used by pointer AND keyboard)
   // =====================================================
 
-<<<<<<< HEAD
   function startDrive(command, triggerBtn = null) {
     if (activeDrive === command) return;
 
@@ -712,9 +658,6 @@ function sendSpeed(speed) {
     btn.addEventListener("lostpointercapture", end);
     btn.addEventListener("contextmenu", (e) => e.preventDefault());
   }
-=======
-
->>>>>>> head
 
   // =====================================================
   // TOGGLE CONTROLS
@@ -738,13 +681,8 @@ function sendSpeed(speed) {
 
       btn.classList.toggle("active", next);
 
-<<<<<<< HEAD
       sendCommand(command, { on: next });
       log(`${command.toUpperCase()}: ${next ? "ON" : "OFF"}`);
-=======
-      // TODO: no backend route exists yet for mic/speaker/light.
-      log(`${command.toUpperCase()}: ${next ? "ON" : "OFF"} (not sent — no backend route yet)`, "warn");
->>>>>>> head
     });
   }
 
@@ -755,7 +693,6 @@ function sendSpeed(speed) {
   // =====================================================
 
   const keys = new Map([
-<<<<<<< HEAD
     ["ArrowUp", "forward"],
     ["w", "forward"],
     ["ArrowDown", "reverse"],
@@ -788,47 +725,6 @@ function sendSpeed(speed) {
     const cmd = keys.get(e.key);
     if (cmd) releaseDrive(cmd);
   });
-=======
-  ["ArrowUp", "forward"],
-  ["w", "forward"],
-  ["ArrowDown", "reverse"],
-  ["s", "reverse"],
-  ["ArrowLeft", "left"],
-  ["a", "left"],
-  ["ArrowRight", "right"],
-  ["d", "right"],
-]);
-
-function keyToDirection(cmd) {
-  if (cmd === "forward") return ["forward", null];
-  if (cmd === "reverse") return ["reverse", null];
-  if (cmd === "left") return [null, false];
-  if (cmd === "right") return [null, true];
-  return [null, null];
-}
-
-window.addEventListener("keydown", (e) => {
-  if (e.repeat) return;
-  if (document.activeElement?.tagName === "INPUT") return;
-
-  const cmd = keys.get(e.key);
-  if (cmd) {
-    e.preventDefault();
-    const [dirCMD, dirLR] = keyToDirection(cmd);
-    sendDirection(dirCMD, dirLR);
-    return;
-  }
-
-  if (e.key === " ") {
-    e.preventDefault();
-    sendDirection("stop", null);
-  }
-});
-
-window.addEventListener("keyup", (e) => {
-  if (keys.get(e.key)) sendDirection("stop", null);
-});
->>>>>>> head
 
   // =====================================================
   // SAFETY CONTROLS
@@ -837,19 +733,11 @@ window.addEventListener("keyup", (e) => {
   // Stop the robot if the page loses focus or is hidden —
   // a held key/pointer with no page focus can't reliably fire
   // its own release event.
-<<<<<<< HEAD
   window.addEventListener("blur", stopDrive);
 
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) stopDrive();
   });
-=======
-  window.addEventListener("blur", () => sendDirection("stop", null));
-
-document.addEventListener("visibilitychange", () => {
-  if (document.hidden) sendDirection("stop", null);
-});
->>>>>>> head
 
   // =====================================================
   // INITIALIZATION
@@ -891,28 +779,12 @@ document.addEventListener("visibilitychange", () => {
   }
 
   // -- speed --
-<<<<<<< HEAD
-=======
-
-  function debounce(fn, delay) {
-  let timer = null;
-  return (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => fn(...args), delay);
-  };
-}
-
-const sendSpeedDebounced = debounce(sendSpeed, 150);
-
-
->>>>>>> head
   const speedSlider = $("speedSlider");
   if (speedSlider) {
     speedSlider.addEventListener("input", (e) => {
       speed = Number(e.target.value);
       const speedValue = $("speedValue");
       if (speedValue) speedValue.textContent = `${speed}%`;
-<<<<<<< HEAD
     });
   }
 
@@ -935,54 +807,6 @@ const sendSpeedDebounced = debounce(sendSpeed, 150);
   const stopBtn = $("stopBtn");
   if (stopBtn) {
     stopBtn.addEventListener("click", stopDrive);
-=======
-      sendSpeedDebounced(speed);
-    });
-  }
-
-    // -- movement buttons (hold-to-drive, auto-stop on release) --
-  function bindHold(id, onPress, onRelease) {
-    const btn = $(id);
-    if (!btn) return;
-
-    btn.addEventListener("pointerdown", (e) => {
-      e.preventDefault();
-      onPress();
-    });
-
-    btn.addEventListener("pointerup", onRelease);
-    btn.addEventListener("pointercancel", onRelease);
-    btn.addEventListener("lostpointercapture", onRelease);
-  }
-
-  bindHold(
-    "forwardBtn",
-    () => sendDirection("forward", null),
-    () => sendDirection("stop", null),
-  );
-
-  bindHold(
-    "reverseBtn",
-    () => sendDirection("reverse", null),
-    () => sendDirection("stop", null),
-  );
-
-  bindHold(
-    "leftBtn",
-    () => sendDirection(null, false),
-    () => sendDirection("stop", null),
-  );
-
-  bindHold(
-    "rightBtn",
-    () => sendDirection(null, true),
-    () => sendDirection("stop", null),
-  );
-
-  const stopBtn = $("stopBtn");
-  if (stopBtn) {
-    stopBtn.addEventListener("click", () => sendDirection("stop", null));
->>>>>>> head
   }
 
   // -- camera / thermal --

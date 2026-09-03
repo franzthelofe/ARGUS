@@ -17,9 +17,60 @@
    {"type":"ack","command":"forward"}
    {"type":"log","message":"HM-10 connected"}
 */
+<<<<<<< HEAD
 
+<<<<<<<< HEAD:website/src/script.js
+========
+function toEmbedded(cmd) {
+  const dirMap = { forward: 'W', left: 'A', reverse: 'S', right: 'D', stop: 'X' };
+  const dir = dirMap[cmd] || cmd;
+
+  fetch('/cmd', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'dir=' + encodeURIComponent(dir),
+  });
+}
+
+>>>>>>>> head:website/backup/script.js
+=======
+// =====================================================
+// DATA TRANSMITTER
+// =====================================================
+
+function sendDirection(dirCMD, dirLR) {
+  const dirMap = { forward: 'F', reverse: 'R', stop: 'X' };
+
+  let body = '';
+
+  if (dirCMD !== null && dirCMD !== undefined) {
+    const dir = dirMap[dirCMD] || dirCMD;
+    body += 'dirCMD=' + encodeURIComponent(dir);
+  }
+
+  if (dirLR !== null && dirLR !== undefined) {
+    if (body) body += '&';
+    body += 'dirLR=' + encodeURIComponent(dirLR);
+  }
+
+  fetch('/dir', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
+  });
+}
+
+function sendSpeed(speed) {
+  const body = 'speed=' + encodeURIComponent(speed);
+  fetch('/speed', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
+  });
+}
+
+>>>>>>> head
 (() => {
-
   // =====================================================
   // CONNECTION VARIABLES
   // =====================================================
@@ -29,7 +80,10 @@
   let baseUrl = DEFAULT_ESP32.replace(/\/+$/, "");
   let socket = null;
   let connected = false;
+<<<<<<< HEAD
   let activeDrive = null;
+=======
+>>>>>>> head
   let speed = 50;
   let currentView = "camera";
   let micOn = false;
@@ -65,12 +119,13 @@
 
     const line = document.createElement("div");
     line.className =
-      level === "error" ? "mb-1 text-emergency-red" :
-      level === "warn"  ? "mb-1 text-primary-container" :
-                          "mb-1";
+      level === "error"
+        ? "mb-1 text-emergency-red"
+        : level === "warn"
+          ? "mb-1 text-primary-container"
+          : "mb-1";
 
-    line.innerHTML =
-      `<span class="text-text-dim/50 mr-2">[${escapeHtml(now())}]</span> &gt; ${escapeHtml(message)}`;
+    line.innerHTML = `<span class="text-text-dim/50 mr-2">[${escapeHtml(now())}]</span> &gt; ${escapeHtml(message)}`;
 
     const oldCursor = consoleEl.querySelector(".argus-console-cursor");
     if (oldCursor) oldCursor.remove();
@@ -78,7 +133,8 @@
     consoleEl.appendChild(line);
 
     const cursor = document.createElement("div");
-    cursor.className = "argus-console-cursor mt-2 text-primary-container animate-pulse";
+    cursor.className =
+      "argus-console-cursor mt-2 text-primary-container animate-pulse";
     cursor.textContent = "_";
     consoleEl.appendChild(cursor);
 
@@ -137,6 +193,7 @@
     return url.replace(/\/+$/, "");
   }
 
+<<<<<<< HEAD
   async function httpCommand(command, extra = {}) {
     if (!baseUrl) {
       log("No ESP32-S3 URL configured.", "warn");
@@ -162,6 +219,8 @@
     }
   }
 
+=======
+>>>>>>> head
   // =====================================================
   // WEBSOCKET
   // =====================================================
@@ -176,7 +235,13 @@
 
       socket.onopen = () => {
         setConnectionState(true, `WebSocket connected: ${wsUrl}`);
-        socket.send(JSON.stringify({ type: "hello", client: "ARGUS-WEB", version: "3.0" }));
+        socket.send(
+          JSON.stringify({
+            type: "hello",
+            client: "ARGUS-WEB",
+            version: "3.0",
+          }),
+        );
         updateSensorState();
       };
 
@@ -250,13 +315,17 @@
 
       setConnectionState(true, "ESP32-S3 HTTP link responding.");
     } catch (e) {
-      log(`HTTP status check failed: ${e.message}. Trying WebSocket...`, "warn");
+      log(
+        `HTTP status check failed: ${e.message}. Trying WebSocket...`,
+        "warn",
+      );
     }
 
     connectSocket();
     updateSensorState();
   }
 
+<<<<<<< HEAD
   function disconnect() {
     if (socket) {
       socket.close();
@@ -267,6 +336,8 @@
     stopDrive();
   }
 
+=======
+>>>>>>> head
   // =====================================================
   // CAMERA / THERMAL
   // =====================================================
@@ -291,7 +362,10 @@
       if (icon) icon.textContent = connected ? "videocam" : "videocam_off";
 
       const text = $("sensorPlaceholderText");
-      if (text) text.textContent = connected ? "WAITING FOR CAMERA STREAM" : "WAITING FOR ESP32-S3";
+      if (text)
+        text.textContent = connected
+          ? "WAITING FOR CAMERA STREAM"
+          : "WAITING FOR ESP32-S3";
 
       if (connected && baseUrl) {
         const stream = `${baseUrl}/stream`;
@@ -320,7 +394,10 @@
       if (icon) icon.textContent = "device_thermostat";
 
       const text = $("sensorPlaceholderText");
-      if (text) text.textContent = connected ? "WAITING FOR MLX90640" : "WAITING FOR ESP32-S3";
+      if (text)
+        text.textContent = connected
+          ? "WAITING FOR MLX90640"
+          : "WAITING FOR ESP32-S3";
 
       if (connected) pollThermal();
     }
@@ -344,6 +421,7 @@
     }
   }
 
+<<<<<<< HEAD
   function setView(view) {
     currentView = view;
 
@@ -352,13 +430,19 @@
 
     if (cameraBtn) {
       cameraBtn.classList.toggle("text-primary-container", view === "camera");
-      cameraBtn.classList.toggle("border-primary-container/50", view === "camera");
+      cameraBtn.classList.toggle(
+        "border-primary-container/50",
+        view === "camera",
+      );
       cameraBtn.classList.toggle("bg-surface-panel", view === "camera");
     }
 
     if (thermalBtn) {
       thermalBtn.classList.toggle("text-primary-container", view === "thermal");
-      thermalBtn.classList.toggle("border-primary-container/50", view === "thermal");
+      thermalBtn.classList.toggle(
+        "border-primary-container/50",
+        view === "thermal",
+      );
       thermalBtn.classList.toggle("bg-surface-panel", view === "thermal");
     }
 
@@ -366,6 +450,8 @@
     updateSensorState();
     log(`Sensor view: ${view.toUpperCase()}`);
   }
+=======
+>>>>>>> head
 
   // =====================================================
   // PROCESS ESP32 MESSAGES
@@ -426,11 +512,11 @@
 
     // Blue -> Cyan -> Green -> Yellow -> Red
     const stops = [
-      [0,    20, 70,  180],
-      [0.25,  0, 190, 255],
-      [0.5,  40, 210, 100],
+      [0, 20, 70, 180],
+      [0.25, 0, 190, 255],
+      [0.5, 40, 210, 100],
       [0.75, 255, 220, 0],
-      [1,    230, 40, 30],
+      [1, 230, 40, 30],
     ];
 
     for (let i = 0; i < stops.length - 1; i++) {
@@ -468,8 +554,12 @@
     const vals = pixels.slice(0, 768).map(Number).filter(Number.isFinite);
     if (!vals.length) return;
 
-    const min = Number.isFinite(Number(minHint)) ? Number(minHint) : Math.min(...vals);
-    const max = Number.isFinite(Number(maxHint)) ? Number(maxHint) : Math.max(...vals);
+    const min = Number.isFinite(Number(minHint))
+      ? Number(minHint)
+      : Math.min(...vals);
+    const max = Number.isFinite(Number(maxHint))
+      ? Number(maxHint)
+      : Math.max(...vals);
 
     const tmp = document.createElement("canvas");
     const tw = 32;
@@ -482,7 +572,9 @@
 
     for (let y = 0; y < 24; y++) {
       for (let x = 0; x < 32; x++) {
-        const color = thermalColor(vals[y * 32 + x], min, max).match(/\d+/g).map(Number);
+        const color = thermalColor(vals[y * 32 + x], min, max)
+          .match(/\d+/g)
+          .map(Number);
         const i = (y * 32 + x) * 4;
 
         image.data[i] = color[0];
@@ -503,7 +595,9 @@
     if (thermalMax) thermalMax.textContent = Number(maxHint ?? max).toFixed(1);
     if (thermalMin) thermalMin.textContent = Number(minHint ?? min).toFixed(1);
 
-    const center = Number.isFinite(Number(centerHint)) ? Number(centerHint) : vals[12 * 32 + 16];
+    const center = Number.isFinite(Number(centerHint))
+      ? Number(centerHint)
+      : vals[12 * 32 + 16];
     if (thermalCenter) thermalCenter.textContent = center.toFixed(1);
 
     const placeholder = $("sensorPlaceholder");
@@ -511,6 +605,7 @@
   }
 
   // =====================================================
+<<<<<<< HEAD
   // GENERIC COMMAND SENDING
   // =====================================================
 
@@ -529,18 +624,24 @@
   }
 
   // =====================================================
+=======
+>>>>>>> head
   // MOVEMENT CONTROL
   // (single source of truth — used by pointer AND keyboard)
   // =====================================================
 
+<<<<<<< HEAD
   function startDrive(command, triggerBtn = null) {
     if (activeDrive === command) return;
 
     activeDrive = command;
 
-    document.querySelectorAll(".drive-btn").forEach((b) => b.classList.remove("is-held"));
+    document
+      .querySelectorAll(".drive-btn")
+      .forEach((b) => b.classList.remove("is-held"));
 
-    const btn = triggerBtn || document.querySelector(`[data-command="${command}"]`);
+    const btn =
+      triggerBtn || document.querySelector(`[data-command="${command}"]`);
     if (btn) btn.classList.add("is-held");
 
     sendCommand(command);
@@ -557,7 +658,9 @@
 
   function stopDrive() {
     activeDrive = null;
-    document.querySelectorAll(".drive-btn").forEach((b) => b.classList.remove("is-held"));
+    document
+      .querySelectorAll(".drive-btn")
+      .forEach((b) => b.classList.remove("is-held"));
     sendCommand("stop");
   }
 
@@ -575,7 +678,11 @@
       if (pointerId !== null) return; // already held by another pointer
 
       pointerId = e.pointerId;
-      try { btn.setPointerCapture(pointerId); } catch (_) { /* ignore */ }
+      try {
+        btn.setPointerCapture(pointerId);
+      } catch (_) {
+        /* ignore */
+      }
 
       startDrive(command, btn);
     };
@@ -584,7 +691,11 @@
       if (e) e.preventDefault();
       if (pointerId === null) return;
 
-      try { btn.releasePointerCapture(pointerId); } catch (_) { /* ignore */ }
+      try {
+        btn.releasePointerCapture(pointerId);
+      } catch (_) {
+        /* ignore */
+      }
       pointerId = null;
 
       releaseDrive(command);
@@ -601,6 +712,9 @@
     btn.addEventListener("lostpointercapture", end);
     btn.addEventListener("contextmenu", (e) => e.preventDefault());
   }
+=======
+
+>>>>>>> head
 
   // =====================================================
   // TOGGLE CONTROLS
@@ -624,8 +738,13 @@
 
       btn.classList.toggle("active", next);
 
+<<<<<<< HEAD
       sendCommand(command, { on: next });
       log(`${command.toUpperCase()}: ${next ? "ON" : "OFF"}`);
+=======
+      // TODO: no backend route exists yet for mic/speaker/light.
+      log(`${command.toUpperCase()}: ${next ? "ON" : "OFF"} (not sent — no backend route yet)`, "warn");
+>>>>>>> head
     });
   }
 
@@ -636,10 +755,15 @@
   // =====================================================
 
   const keys = new Map([
-    ["ArrowUp", "forward"], ["w", "forward"],
-    ["ArrowDown", "reverse"], ["s", "reverse"],
-    ["ArrowLeft", "left"], ["a", "left"],
-    ["ArrowRight", "right"], ["d", "right"],
+<<<<<<< HEAD
+    ["ArrowUp", "forward"],
+    ["w", "forward"],
+    ["ArrowDown", "reverse"],
+    ["s", "reverse"],
+    ["ArrowLeft", "left"],
+    ["a", "left"],
+    ["ArrowRight", "right"],
+    ["d", "right"],
   ]);
 
   window.addEventListener("keydown", (e) => {
@@ -664,6 +788,47 @@
     const cmd = keys.get(e.key);
     if (cmd) releaseDrive(cmd);
   });
+=======
+  ["ArrowUp", "forward"],
+  ["w", "forward"],
+  ["ArrowDown", "reverse"],
+  ["s", "reverse"],
+  ["ArrowLeft", "left"],
+  ["a", "left"],
+  ["ArrowRight", "right"],
+  ["d", "right"],
+]);
+
+function keyToDirection(cmd) {
+  if (cmd === "forward") return ["forward", null];
+  if (cmd === "reverse") return ["reverse", null];
+  if (cmd === "left") return [null, false];
+  if (cmd === "right") return [null, true];
+  return [null, null];
+}
+
+window.addEventListener("keydown", (e) => {
+  if (e.repeat) return;
+  if (document.activeElement?.tagName === "INPUT") return;
+
+  const cmd = keys.get(e.key);
+  if (cmd) {
+    e.preventDefault();
+    const [dirCMD, dirLR] = keyToDirection(cmd);
+    sendDirection(dirCMD, dirLR);
+    return;
+  }
+
+  if (e.key === " ") {
+    e.preventDefault();
+    sendDirection("stop", null);
+  }
+});
+
+window.addEventListener("keyup", (e) => {
+  if (keys.get(e.key)) sendDirection("stop", null);
+});
+>>>>>>> head
 
   // =====================================================
   // SAFETY CONTROLS
@@ -672,11 +837,19 @@
   // Stop the robot if the page loses focus or is hidden —
   // a held key/pointer with no page focus can't reliably fire
   // its own release event.
+<<<<<<< HEAD
   window.addEventListener("blur", stopDrive);
 
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) stopDrive();
   });
+=======
+  window.addEventListener("blur", () => sendDirection("stop", null));
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) sendDirection("stop", null);
+});
+>>>>>>> head
 
   // =====================================================
   // INITIALIZATION
@@ -685,7 +858,9 @@
   // -- connection modal --
   const connectBtn = $("connectBtn");
   if (connectBtn) {
-    connectBtn.addEventListener("click", () => (connected ? disconnect() : connect()));
+    connectBtn.addEventListener("click", () =>
+      connected ? disconnect() : connect(),
+    );
   }
 
   const closeConnection = $("closeConnection");
@@ -716,12 +891,28 @@
   }
 
   // -- speed --
+<<<<<<< HEAD
+=======
+
+  function debounce(fn, delay) {
+  let timer = null;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), delay);
+  };
+}
+
+const sendSpeedDebounced = debounce(sendSpeed, 150);
+
+
+>>>>>>> head
   const speedSlider = $("speedSlider");
   if (speedSlider) {
     speedSlider.addEventListener("input", (e) => {
       speed = Number(e.target.value);
       const speedValue = $("speedValue");
       if (speedValue) speedValue.textContent = `${speed}%`;
+<<<<<<< HEAD
     });
   }
 
@@ -736,14 +927,62 @@
   }
 
   // -- movement buttons (the ONLY movement-control system) --
-  bindHoldButton("forwardBtn", "forward");
-  bindHoldButton("reverseBtn", "reverse");
-  bindHoldButton("leftBtn", "left");
-  bindHoldButton("rightBtn", "right");
+  // bindHoldButton("forwardBtn", "forward");
+  // bindHoldButton("reverseBtn", "reverse");
+  // bindHoldButton("leftBtn", "left");
+  // bindHoldButton("rightBtn", "right");
 
   const stopBtn = $("stopBtn");
   if (stopBtn) {
     stopBtn.addEventListener("click", stopDrive);
+=======
+      sendSpeedDebounced(speed);
+    });
+  }
+
+    // -- movement buttons (hold-to-drive, auto-stop on release) --
+  function bindHold(id, onPress, onRelease) {
+    const btn = $(id);
+    if (!btn) return;
+
+    btn.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      onPress();
+    });
+
+    btn.addEventListener("pointerup", onRelease);
+    btn.addEventListener("pointercancel", onRelease);
+    btn.addEventListener("lostpointercapture", onRelease);
+  }
+
+  bindHold(
+    "forwardBtn",
+    () => sendDirection("forward", null),
+    () => sendDirection("stop", null),
+  );
+
+  bindHold(
+    "reverseBtn",
+    () => sendDirection("reverse", null),
+    () => sendDirection("stop", null),
+  );
+
+  bindHold(
+    "leftBtn",
+    () => sendDirection(null, false),
+    () => sendDirection("stop", null),
+  );
+
+  bindHold(
+    "rightBtn",
+    () => sendDirection(null, true),
+    () => sendDirection("stop", null),
+  );
+
+  const stopBtn = $("stopBtn");
+  if (stopBtn) {
+    stopBtn.addEventListener("click", () => sendDirection("stop", null));
+>>>>>>> head
   }
 
   // -- camera / thermal --
@@ -751,12 +990,31 @@
   if (cameraBtn) cameraBtn.addEventListener("click", () => setView("camera"));
 
   const thermalBtn = $("thermalBtn");
-  if (thermalBtn) thermalBtn.addEventListener("click", () => setView("thermal"));
+  if (thermalBtn)
+    thermalBtn.addEventListener("click", () => setView("thermal"));
 
   // -- microphone / speaker / light --
-  bindToggle("micBtn", () => micOn, (v) => (micOn = v), "microphone", "micStatus");
-  bindToggle("speakerBtn", () => speakerOn, (v) => (speakerOn = v), "speaker", "speakerStatus");
-  bindToggle("lightBtn", () => lightOn, (v) => (lightOn = v), "light", "lightStatus");
+  bindToggle(
+    "micBtn",
+    () => micOn,
+    (v) => (micOn = v),
+    "microphone",
+    "micStatus",
+  );
+  bindToggle(
+    "speakerBtn",
+    () => speakerOn,
+    (v) => (speakerOn = v),
+    "speaker",
+    "speakerStatus",
+  );
+  bindToggle(
+    "lightBtn",
+    () => lightOn,
+    (v) => (lightOn = v),
+    "light",
+    "lightStatus",
+  );
 
   // -- bluetooth (informational only — link is ESP32-S3 -> HM-10 -> STM32) --
   const bluetoothBtn = $("bluetoothBtn");
@@ -771,7 +1029,8 @@
   if (clearConsole) {
     clearConsole.addEventListener("click", () => {
       if (consoleEl) {
-        consoleEl.innerHTML = '<div class="mt-2 text-primary-container animate-pulse">_</div>';
+        consoleEl.innerHTML =
+          '<div class="mt-2 text-primary-container animate-pulse">_</div>';
       }
     });
   }
@@ -789,5 +1048,4 @@
   if (baseUrl) {
     log(`Saved ESP32-S3 URL: ${baseUrl}`);
   }
-
 })();

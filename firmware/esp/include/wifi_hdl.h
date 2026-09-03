@@ -6,8 +6,11 @@
 
 #include <WiFi.h>
 #include <WebServer.h>
+#include <HTTPClient.h>
 
 #include <inttypes.h>
+
+#define IPADDR "192.168.4.1"
 
 extern WebServer server;
 

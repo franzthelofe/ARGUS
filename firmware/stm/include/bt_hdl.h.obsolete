@@ -1,0 +1,21 @@
+
+#ifndef BT_HDL_H
+#define BT_HDL_H
+
+#include <SoftwareSerial.h>
+
+#define TXD_PIN PB0
+#define RXD_PIN PB1
+
+extern SoftwareSerial btSerial;
+
+void btSetupPin(void);
+
+void btSerialInit(void);
+
+int btSerialRead(void);
+
+void btSerialWrite(const char *msg);
+
+#endif // BT_HDL_H
+

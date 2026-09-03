@@ -5,6 +5,12 @@
 		},
 		{
 			"path": "firmware/esp"
+<<<<<<< HEAD
+=======
+		},
+		{
+			"path": "website"
+>>>>>>> head
 		}
 	],
 	"settings": {}
