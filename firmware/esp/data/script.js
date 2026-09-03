@@ -69,7 +69,6 @@ function sendSpeed(speed) {
   });
 }
 
->>>>>>> head
 (() => {
   // =====================================================
   // CONNECTION VARIABLES
@@ -80,7 +79,6 @@ function sendSpeed(speed) {
   let baseUrl = DEFAULT_ESP32.replace(/\/+$/, "");
   let socket = null;
   let connected = false;
-<<<<<<< HEAD
   let activeDrive = null;
 =======
 >>>>>>> head
