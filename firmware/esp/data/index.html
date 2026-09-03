@@ -1,231 +1,272 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#111316">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#111316" />
     <title>ARGUS Controller</title>
-    <link rel="stylesheet" href="style.css">
-</head>
+    <link rel="stylesheet" href="style.css" />
+  </head>
 
-<body>
-
-<header class="topbar">
-    <div class="brand-group">
+  <body>
+    <header class="topbar">
+      <div class="brand-group">
         <h1 class="brand">ARGUS</h1>
         <span class="subtitle">SEARCH &amp; RESCUE ROBOT CONTROLLER</span>
-    </div>
-
-    <div class="top-actions">
-        <button id="connectBtn" class="control-btn small-btn" type="button">CONNECT</button>
-
-        <div id="connectionBadge" class="connection-badge">
-            <span class="connection-dot">●</span>
-            <span id="connectionText">[ DISCONNECTED ]</span>
-        </div>
-
+      </div>
+      
         <div class="battery-box">
-            <span>BATTERY</span>
-            <span id="batteryValue" class="battery-value">--%</span>
+          <span>BATTERY</span>
+          <span id="batteryValue" class="battery-value">--%</span>
         </div>
-    </div>
-</header>
+      </div>
+    </header>
 
-<main class="workspace">
-
-    <section class="panel movement-panel">
+    <main class="workspace">
+      <section class="panel movement-panel">
         <div class="panel-heading">
-            <div class="heading-left">
-                <span class="heading-icon">⌘</span>
-                <h2>MOVEMENT CONTROL</h2>
-            </div>
+          <div class="heading-left">
+            <span class="heading-icon">⌘</span>
+            <h2>MOVEMENT CONTROL</h2>
+          </div>
         </div>
 
         <div class="dpad-area">
-            <div class="dpad">
-                <button id="forwardBtn" data-command="forward" aria-label="Forward"
-                        class="control-btn drive-btn dpad-up" type="button">
-                    <span class="arrow">▲</span>
-                </button>
+          <div class="dpad">
+            <button
+              id="forwardBtn"
+              data-command="forward"
+              aria-label="Forward"
+              class="control-btn drive-btn dpad-up"
+              type="button"
+            >
+              <span class="arrow">▲</span>
+            </button>
 
-                <button id="leftBtn" data-command="left" aria-label="Left"
-                        class="control-btn drive-btn dpad-left" type="button">
-                    <span class="arrow">◀</span>
-                </button>
+            <button
+              id="leftBtn"
+              data-command="left"
+              aria-label="Left"
+              class="control-btn drive-btn dpad-left"
+              type="button"
+            >
+              <span class="arrow">◀</span>
+            </button>
 
-                <button id="stopBtn" data-command="stop" aria-label="Stop"
-                        class="control-btn drive-btn dpad-stop" type="button">
-                    <span class="stop-square"></span>
-                </button>
+            <button
+              id="stopBtn"
+              data-command="stop"
+              aria-label="Stop"
+              class="control-btn drive-btn dpad-stop"
+              type="button"            
+            >
+              <span class="stop-square"></span>
+            </button>
 
-                <button id="rightBtn" data-command="right" aria-label="Right"
-                        class="control-btn drive-btn dpad-right" type="button">
-                    <span class="arrow">▶</span>
-                </button>
+            <button
+              id="rightBtn"
+              data-command="right"
+              aria-label="Right"
+              class="control-btn drive-btn dpad-right"
+              type="button"
+            >
+              <span class="arrow">▶</span>
+            </button>
 
-                <button id="reverseBtn" data-command="reverse" aria-label="Reverse"
-                        class="control-btn drive-btn dpad-down" type="button">
-                    <span class="arrow">▼</span>
-                </button>
-            </div>
+            <button
+              id="reverseBtn"
+              data-command="reverse"
+              aria-label="Reverse"
+              class="control-btn drive-btn dpad-down"
+              type="button"
+            >
+              <span class="arrow">▼</span>
+            </button>
+          </div>
         </div>
 
         <div class="speed-box">
-            <div class="speed-heading">
-                <span>SPEED LIMITER</span>
-                <span id="speedValue" class="speed-value">50%</span>
-            </div>
+          <div class="speed-heading">
+            <span>SPEED LIMITER</span>
+            <span id="speedValue" class="speed-value">50%</span>
+          </div>
 
-            <input id="speedSlider" aria-label="Speed Control"
-                   class="speed-slider" max="100" min="0"
-                   type="range" value="50">
+          <input
+            id="speedSlider"
+            aria-label="Speed Control"
+            class="speed-slider"
+            max="100"
+            min="0"
+            type="range"
+            value="50"
+          />
 
-            <div class="slider-labels">
-                <span>MIN</span>
-                <span>MAX</span>
-            </div>
+          <div class="slider-labels">
+            <span>MIN</span>
+            <span>MAX</span>
+          </div>
         </div>
 
-        <button id="estopBtn" type="button" class="estop-btn">
-            <span>⚠</span>
-            EMERGENCY STOP
-        </button>
-    </section>
+      </section>
 
-    <section class="functions-panel">
-
+      <section class="functions-panel">
         <div class="panel sensor-panel">
-            <div class="sensor-heading">
-                <div class="heading-left">
-                    <span class="heading-icon">◉</span>
-                    <span>SENSOR VIEW</span>
-                </div>
-
-                <span id="viewModeLabel" class="view-mode-label">CAMERA FEED</span>
+          <div class="sensor-heading">
+            <div class="heading-left">
+              <span class="heading-icon">◉</span>
+              <span>SENSOR VIEW</span>
             </div>
 
-            <div id="sensorViewport" class="sensor-viewport">
-                <div class="viewport-grid"></div>
-                <div class="crosshair"></div>
+            <span id="viewModeLabel" class="view-mode-label">CAMERA FEED</span>
+          </div>
 
-                <img id="cameraFeed" class="camera-feed hidden" alt="ARGUS camera feed">
+          <div id="sensorViewport" class="sensor-viewport">
+            <div class="viewport-grid"></div>
+            <div class="crosshair"></div>
 
-                <canvas id="thermalCanvas" class="thermal-canvas hidden"
-                        aria-label="MLX90640 thermal view"></canvas>
+            <img
+              id="cameraFeed"
+              class="camera-feed hidden"
+              alt="ARGUS camera feed"
+            />
 
-                <div id="sensorPlaceholder" class="sensor-placeholder">
-                    <span id="sensorPlaceholderIcon" class="placeholder-icon">▣</span>
-                    <span id="sensorPlaceholderText">WAITING FOR ESP32-S3</span>
-                </div>
+            <canvas
+              id="thermalCanvas"
+              class="thermal-canvas hidden"
+              aria-label="MLX90640 thermal view"
+            ></canvas>
 
-                <div id="thermalReadout" class="thermal-readout hidden">
-                    <span>MAX <b id="thermalMax">--</b>°C</span>
-                    <span>|</span>
-                    <span>CENTER <b id="thermalCenter">--</b>°C</span>
-                    <span>|</span>
-                    <span>MIN <b id="thermalMin">--</b>°C</span>
-                </div>
+            <div id="sensorPlaceholder" class="sensor-placeholder">
+              <span id="sensorPlaceholderIcon" class="placeholder-icon">▣</span>
+              <span id="sensorPlaceholderText">WAITING FOR ESP32-S3</span>
             </div>
 
-            <div class="view-toggles">
-                <button id="cameraBtn" type="button" class="view-toggle active">
-                    <span>▣</span> CAMERA
-                </button>
-
-                <button id="thermalBtn" type="button" class="view-toggle">
-                    <span>°C</span> THERMAL
-                </button>
+            <div id="thermalReadout" class="thermal-readout hidden">
+              <span>MAX <b id="thermalMax">--</b>°C</span>
+              <span>|</span>
+              <span>CENTER <b id="thermalCenter">--</b>°C</span>
+              <span>|</span>
+              <span>MIN <b id="thermalMin">--</b>°C</span>
             </div>
+          </div>
+
+          <div class="view-toggles">
+            <button id="cameraBtn" type="button" class="view-toggle active">
+              <span>▣</span> CAMERA
+            </button>
+
+            <button id="thermalBtn" type="button" class="view-toggle">
+              <span>°C</span> THERMAL
+            </button>
+          </div>
         </div>
 
         <div class="controls-grid">
+          <button id="micBtn" type="button" class="function-btn">
+            <span class="hardware-label">INMP441</span>
+            <span class="function-icon">♩</span>
+            <span class="function-title">MICROPHONE</span>
+            <span id="micStatus" class="function-status offline">OFFLINE</span>
+          </button>
 
-            <button id="micBtn" type="button" class="function-btn">
-                <span class="hardware-label">INMP441</span>
-                <span class="function-icon">♩</span>
-                <span class="function-title">MICROPHONE</span>
-                <span id="micStatus" class="function-status offline">OFFLINE</span>
-            </button>
+          <button id="speakerBtn" type="button" class="function-btn">
+            <span class="hardware-label">MAX98357A</span>
+            <span class="function-icon">◖</span>
+            <span class="function-title">SPEAKER</span>
+            <span id="speakerStatus" class="function-status offline"
+              >OFFLINE</span
+            >
+          </button>
 
-            <button id="speakerBtn" type="button" class="function-btn">
-                <span class="hardware-label">MAX98357A</span>
-                <span class="function-icon">◖</span>
-                <span class="function-title">SPEAKER</span>
-                <span id="speakerStatus" class="function-status offline">OFFLINE</span>
-            </button>
-
-            <button id="lightBtn" type="button" class="function-btn">
-                <span class="hardware-label">MLX90640</span>
-                <span class="function-icon">✦</span>
-                <span class="function-title">LIGHT</span>
-                <span id="lightStatus" class="function-status">OFF</span>
-            </button>
-
-            <button id="bluetoothBtn" type="button" class="function-btn">
-                <span class="hardware-label">ESP32-S3</span>
-                <span class="function-icon">ᛒ</span>
-                <span class="function-title">BLUETOOTH</span>
-                <span id="bluetoothStatus" class="function-status offline">DISCONNECTED</span>
-            </button>
+          <button id="lightBtn" type="button" class="function-btn">
+            <span class="hardware-label">MLX90640</span>
+            <span class="function-icon">✦</span>
+            <span class="function-title">LIGHT</span>
+            <span id="lightStatus" class="function-status">OFF</span>
+          </button>
 
         </div>
 
         <div class="panel system-panel">
-            <div class="sensor-heading">
-                <div class="heading-left">
-                    <span class="heading-icon">&gt;_</span>
-                    <h2>SYSTEM READOUT</h2>
-                </div>
-
-                <button id="clearConsole" aria-label="Clear Console"
-                        class="clear-btn" type="button">⌫</button>
+          <div class="sensor-heading">
+            <div class="heading-left">
+              <span class="heading-icon">&gt;_</span>
+              <h2>SYSTEM READOUT</h2>
             </div>
 
-            <div id="systemConsole" class="system-console">
-                <div class="console-line">
-                    <span class="console-tag">[BOOT]</span>
-                    &gt; ARGUS controller ready.
-                </div>
-                <div class="console-line">
-                    <span class="console-tag">[LINK]</span>
-                    &gt; Waiting for ESP32-S3 N16R8.
-                </div>
-                <div class="console-cursor">_</div>
+            <button
+              id="clearConsole"
+              aria-label="Clear Console"
+              class="clear-btn"
+              type="button"
+            >
+              ⌫
+            </button>
+          </div>
+
+          <div id="systemConsole" class="system-console">
+            <div class="console-line">
+              <span class="console-tag">[BOOT]</span>
+              &gt; ARGUS controller ready.
             </div>
+            <div class="console-line">
+              <span class="console-tag">[LINK]</span>
+              &gt; Waiting for ESP32-S3 N16R8.
+            </div>
+            <div class="console-cursor">_</div>
+          </div>
         </div>
+      </section>
+    </main>
 
-    </section>
-</main>
-
-<div id="connectionModal" class="modal hidden">
-    <div class="modal-card">
+    <div id="connectionModal" class="modal hidden">
+      <div class="modal-card">
         <div class="modal-heading">
-            <h2>ESP32-S3 CONNECTION</h2>
-            <button id="closeConnection" type="button"
-                    class="close-btn" aria-label="Close">×</button>
+          <h2>ESP32-S3 CONNECTION</h2>
+          <button
+            id="closeConnection"
+            type="button"
+            class="close-btn"
+            aria-label="Close"
+          >
+            ×
+          </button>
         </div>
 
         <label for="esp32Url">ESP32 BASE URL</label>
 
-        <input id="esp32Url" class="url-input"
-               placeholder="http://192.168.4.1" value="">
+        <input
+          id="esp32Url"
+          class="url-input"
+          placeholder="http://192.168.4.1"
+          value=""
+        />
 
         <p class="modal-help">
-            The browser connects to the ESP32-S3 over Wi-Fi.
-            The ESP32-S3 can then relay drive commands to the
-            HM-10 → STM32 → motor driver.
+          The browser connects to the ESP32-S3 over Wi-Fi. The ESP32-S3 can then
+          relay drive commands to the HM-10 → STM32 → motor driver.
         </p>
 
         <div class="modal-actions">
-            <button id="cancelConnection" type="button"
-                    class="control-btn modal-btn">CANCEL</button>
+          <button
+            id="cancelConnection"
+            type="button"
+            class="control-btn modal-btn"
+          >
+            CANCEL
+          </button>
 
-            <button id="saveConnection" type="button"
-                    class="control-btn modal-btn connect-modal-btn">CONNECT</button>
+          <button
+            id="saveConnection"
+            type="button"
+            class="control-btn modal-btn connect-modal-btn"
+          >
+            CONNECT
+          </button>
         </div>
+      </div>
     </div>
-</div>
 
-<script src="script.js"></script>
-</body>
+    <script src="script.js"></script>
+  </body>
 </html>

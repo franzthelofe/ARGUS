@@ -8,6 +8,7 @@
 
 static String logBuf[LOG_BUF_LINES];
 static int logIndex = 0;
+static String payload;
 
 WebServer server(80);
 
@@ -18,7 +19,7 @@ void logPrintln(const String &msg)
     logIndex = (logIndex + 1) % LOG_BUF_LINES;
 }
 
-static void handleLog()
+static String buildLogString()
 {
     String out;
     for (int i = 0; i < LOG_BUF_LINES; i++)
@@ -27,8 +28,16 @@ static void handleLog()
         if (logBuf[idx].length())
             out += logBuf[idx] + "\n";
     }
-    server.send(200, "text/plain", out);
+    return out;
 }
+
+static void handleLog()
+{
+    server.send(200, "text/plain", buildLogString());
+}
+
+/*_____________________________________________________________________________________*/
+
 
 static void handleCSS()
 {
@@ -42,58 +51,96 @@ static void handleCSS()
     f.close();
 }
 
-static void handleColor()
+/*_____________________________________________________________________________________*/
+
+void handleDirection(void)
 {
-    if (!server.hasArg("c"))
+    bool handledSomething = false;
+
+    if (server.hasArg("dirCMD"))
     {
-        server.send(400, "text/plain", "missing c");
+        String dir = server.arg("dirCMD");
+        dir.trim();
 
-        return;
-    }
-
-    String c = server.arg("c");
-
-    static const struct { const char *name; Color value; } table[] =
-    {
-        {"R1", R1}, {"R2", R2}, {"R3", R3}, {"R4", R4},
-        {"G1", G1}, {"G2", G2}, {"G3", G3}, {"G4", G4},
-        {"B1", B1_}, {"B2", B2}, {"B3", B3}, {"B4", B4},
-    };
-
-    for (auto &entry : table)
-    {
-        if (c == entry.name)
+        if (dir.length())
         {
-            LEDColor(entry.value);
-            LEDShow();
-
-            server.send(200, "text/plain", "ok");
-
-            return;
+            switch (dir[0])
+            {
+            case 'F':   // forward
+                LEDColor(B4);
+                LEDShow();
+                handledSomething = true;
+                break;
+            case 'R':   // reverse
+                LEDColor(B4);
+                LEDShow();
+                handledSomething = true;
+                break;
+            case 'X':   // stop
+                led[0] = CRGB(0, 0, 0);
+                LEDShow();
+                handledSomething = true;
+                break;
+            default:
+                server.send(400, "text/plain", "invalid dirCMD");
+                return;
+            }
         }
     }
 
-    server.send(400, "text/plain", "unknown color");
-}
-
-static void handleRGB()
-{
-    if (!server.hasArg("r") || !server.hasArg("g") || !server.hasArg("b"))
+    if (server.hasArg("dirLR"))
     {
-        server.send(400, "text/plain", "missing r/g/b");
+        String dirLR = server.arg("dirLR");
 
+        if (dirLR == "true")        // right
+        {
+            LEDColor(G4);
+            LEDShow();
+            handledSomething = true;
+        }
+        else if (dirLR == "false")  // left
+        {
+            LEDColor(R4);
+            LEDShow();
+            handledSomething = true;
+        }
+    }
+
+    if (!handledSomething)
+    {
+        server.send(400, "text/plain", "missing args");
         return;
     }
 
-    uint8_t r = server.arg("r").toInt();
-    uint8_t g = server.arg("g").toInt();
-    uint8_t b = server.arg("b").toInt();
-
-    led[0] = CRGB(r, g, b);
-    LEDShow();
-
     server.send(200, "text/plain", "ok");
 }
+
+void handleSpeed(void)
+{
+    if (server.hasArg("speed"))
+    {
+        String speedStr = server.arg("speed");
+        speedStr.trim();
+        int speed = speedStr.toInt();
+
+        if (speed < 0 || speed > 255)
+        {
+            server.send(400, "text/plain", "invalid args");
+            return;
+        }
+
+        logPrintln("Speed set to: " + String(speed) + "%");
+        led[0] = CHSV(0, 255, speed);
+        server.send(200, "text/plain", "ok");
+    }
+    else
+    {
+        server.send(400, "text/plain", "missing args");
+    }
+}
+
+/*_____________________________________________________________________________________*/
+
 
 void setupServerRoutes(void)
 {
@@ -116,10 +163,10 @@ void setupServerRoutes(void)
     server.serveStatic("/", LittleFS, "/index.html");
     server.serveStatic("/script.js", LittleFS, "/script.js");
 
-    server.on("/color", handleColor);
-    server.on("/rgb", handleRGB);
-
     server.on("/log", handleLog);
+
+    server.on("/dir", handleDirection);
+    server.on("/speed", handleSpeed);
 
     server.begin();
 }
@@ -144,7 +191,7 @@ void setupWIFI(const char *ssid, const char *pass)
     logPrintln("AP started: " + String(ssid));
     logPrintln("Browse to: http://" + ip.toString());
     
-    LEDColor(G1);
+    LEDColor(G4);
     LEDShow();
     delay(500);
 

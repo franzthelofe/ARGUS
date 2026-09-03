@@ -17,23 +17,6 @@
    {"type":"ack","command":"forward"}
    {"type":"log","message":"HM-10 connected"}
 */
-<<<<<<< HEAD
-
-<<<<<<<< HEAD:website/src/script.js
-========
-function toEmbedded(cmd) {
-  const dirMap = { forward: 'W', left: 'A', reverse: 'S', right: 'D', stop: 'X' };
-  const dir = dirMap[cmd] || cmd;
-
-  fetch('/cmd', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: 'dir=' + encodeURIComponent(dir),
-  });
-}
-
->>>>>>>> head:website/backup/script.js
-=======
 // =====================================================
 // DATA TRANSMITTER
 // =====================================================
@@ -79,9 +62,6 @@ function sendSpeed(speed) {
   let baseUrl = DEFAULT_ESP32.replace(/\/+$/, "");
   let socket = null;
   let connected = false;
-  let activeDrive = null;
-=======
->>>>>>> head
   let speed = 50;
   let currentView = "camera";
   let micOn = false;
@@ -191,34 +171,6 @@ function sendSpeed(speed) {
     return url.replace(/\/+$/, "");
   }
 
-<<<<<<< HEAD
-  async function httpCommand(command, extra = {}) {
-    if (!baseUrl) {
-      log("No ESP32-S3 URL configured.", "warn");
-      return false;
-    }
-
-    try {
-      const response = await fetch(`${baseUrl}/api/command`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ command, ...extra }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      return true;
-    } catch (e) {
-      log(`Command ${command} failed: ${e.message}`, "error");
-      setConnectionState(false);
-      return false;
-    }
-  }
-
-=======
->>>>>>> head
   // =====================================================
   // WEBSOCKET
   // =====================================================
@@ -323,19 +275,6 @@ function sendSpeed(speed) {
     updateSensorState();
   }
 
-<<<<<<< HEAD
-  function disconnect() {
-    if (socket) {
-      socket.close();
-    }
-
-    socket = null;
-    setConnectionState(false, "Disconnected by operator.");
-    stopDrive();
-  }
-
-=======
->>>>>>> head
   // =====================================================
   // CAMERA / THERMAL
   // =====================================================
@@ -419,37 +358,6 @@ function sendSpeed(speed) {
     }
   }
 
-<<<<<<< HEAD
-  function setView(view) {
-    currentView = view;
-
-    const cameraBtn = $("cameraBtn");
-    const thermalBtn = $("thermalBtn");
-
-    if (cameraBtn) {
-      cameraBtn.classList.toggle("text-primary-container", view === "camera");
-      cameraBtn.classList.toggle(
-        "border-primary-container/50",
-        view === "camera",
-      );
-      cameraBtn.classList.toggle("bg-surface-panel", view === "camera");
-    }
-
-    if (thermalBtn) {
-      thermalBtn.classList.toggle("text-primary-container", view === "thermal");
-      thermalBtn.classList.toggle(
-        "border-primary-container/50",
-        view === "thermal",
-      );
-      thermalBtn.classList.toggle("bg-surface-panel", view === "thermal");
-    }
-
-    sendCommand(view === "camera" ? "view_camera" : "view_thermal");
-    updateSensorState();
-    log(`Sensor view: ${view.toUpperCase()}`);
-  }
-=======
->>>>>>> head
 
   // =====================================================
   // PROCESS ESP32 MESSAGES
@@ -603,116 +511,11 @@ function sendSpeed(speed) {
   }
 
   // =====================================================
-<<<<<<< HEAD
-  // GENERIC COMMAND SENDING
-  // =====================================================
-
-  function sendCommand(command, extra = {}) {
-    const payload = { type: "command", command, speed, ...extra };
-
-    // Prefer WebSocket.
-    if (socket && socket.readyState === WebSocket.OPEN) {
-      socket.send(JSON.stringify(payload));
-      return true;
-    }
-
-    // HTTP fallback.
-    httpCommand(command, { speed, ...extra });
-    return false;
-  }
-
-  // =====================================================
-=======
->>>>>>> head
   // MOVEMENT CONTROL
   // (single source of truth — used by pointer AND keyboard)
   // =====================================================
 
-<<<<<<< HEAD
-  function startDrive(command, triggerBtn = null) {
-    if (activeDrive === command) return;
 
-    activeDrive = command;
-
-    document
-      .querySelectorAll(".drive-btn")
-      .forEach((b) => b.classList.remove("is-held"));
-
-    const btn =
-      triggerBtn || document.querySelector(`[data-command="${command}"]`);
-    if (btn) btn.classList.add("is-held");
-
-    sendCommand(command);
-    log(`DRIVE ${command.toUpperCase()} @ ${speed}%`);
-  }
-
-  function releaseDrive(command) {
-    // Only stop if this release corresponds to the direction
-    // currently driving — an already-overridden key/button
-    // releasing later must not cancel the newer command.
-    if (activeDrive !== command) return;
-    stopDrive();
-  }
-
-  function stopDrive() {
-    activeDrive = null;
-    document
-      .querySelectorAll(".drive-btn")
-      .forEach((b) => b.classList.remove("is-held"));
-    sendCommand("stop");
-  }
-
-  function bindHoldButton(id, command) {
-    const btn = $(id);
-    if (!btn) return;
-
-    // Prevent scrolling/dragging while operating this control.
-    btn.style.touchAction = "none";
-
-    let pointerId = null;
-
-    const start = (e) => {
-      e.preventDefault();
-      if (pointerId !== null) return; // already held by another pointer
-
-      pointerId = e.pointerId;
-      try {
-        btn.setPointerCapture(pointerId);
-      } catch (_) {
-        /* ignore */
-      }
-
-      startDrive(command, btn);
-    };
-
-    const end = (e) => {
-      if (e) e.preventDefault();
-      if (pointerId === null) return;
-
-      try {
-        btn.releasePointerCapture(pointerId);
-      } catch (_) {
-        /* ignore */
-      }
-      pointerId = null;
-
-      releaseDrive(command);
-    };
-
-    // Pointer Events only. No touchstart/touchend, no click handlers here.
-    // pointerleave is intentionally NOT bound: once pointer capture is set
-    // on pointerdown, this element keeps receiving pointerup/pointercancel
-    // even if the finger/cursor drifts outside its bounds, so relying on
-    // "leave" would stop the robot while the user is still holding it.
-    btn.addEventListener("pointerdown", start);
-    btn.addEventListener("pointerup", end);
-    btn.addEventListener("pointercancel", end);
-    btn.addEventListener("lostpointercapture", end);
-    btn.addEventListener("contextmenu", (e) => e.preventDefault());
-  }
-=======
-
->>>>>>> head
 
   // =====================================================
   // TOGGLE CONTROLS
@@ -736,13 +539,8 @@ function sendSpeed(speed) {
 
       btn.classList.toggle("active", next);
 
-<<<<<<< HEAD
-      sendCommand(command, { on: next });
-      log(`${command.toUpperCase()}: ${next ? "ON" : "OFF"}`);
-=======
       // TODO: no backend route exists yet for mic/speaker/light.
       log(`${command.toUpperCase()}: ${next ? "ON" : "OFF"} (not sent — no backend route yet)`, "warn");
->>>>>>> head
     });
   }
 
@@ -753,40 +551,6 @@ function sendSpeed(speed) {
   // =====================================================
 
   const keys = new Map([
-<<<<<<< HEAD
-    ["ArrowUp", "forward"],
-    ["w", "forward"],
-    ["ArrowDown", "reverse"],
-    ["s", "reverse"],
-    ["ArrowLeft", "left"],
-    ["a", "left"],
-    ["ArrowRight", "right"],
-    ["d", "right"],
-  ]);
-
-  window.addEventListener("keydown", (e) => {
-    if (e.repeat) return;
-    if (document.activeElement?.tagName === "INPUT") return;
-
-    const cmd = keys.get(e.key);
-    if (cmd) {
-      e.preventDefault();
-      const btn = document.querySelector(`[data-command="${cmd}"]`);
-      startDrive(cmd, btn);
-      return;
-    }
-
-    if (e.key === " ") {
-      e.preventDefault();
-      stopDrive();
-    }
-  });
-
-  window.addEventListener("keyup", (e) => {
-    const cmd = keys.get(e.key);
-    if (cmd) releaseDrive(cmd);
-  });
-=======
   ["ArrowUp", "forward"],
   ["w", "forward"],
   ["ArrowDown", "reverse"],
@@ -826,7 +590,6 @@ window.addEventListener("keydown", (e) => {
 window.addEventListener("keyup", (e) => {
   if (keys.get(e.key)) sendDirection("stop", null);
 });
->>>>>>> head
 
   // =====================================================
   // SAFETY CONTROLS
@@ -835,19 +598,11 @@ window.addEventListener("keyup", (e) => {
   // Stop the robot if the page loses focus or is hidden —
   // a held key/pointer with no page focus can't reliably fire
   // its own release event.
-<<<<<<< HEAD
-  window.addEventListener("blur", stopDrive);
-
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) stopDrive();
-  });
-=======
   window.addEventListener("blur", () => sendDirection("stop", null));
 
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) sendDirection("stop", null);
 });
->>>>>>> head
 
   // =====================================================
   // INITIALIZATION
@@ -889,8 +644,6 @@ document.addEventListener("visibilitychange", () => {
   }
 
   // -- speed --
-<<<<<<< HEAD
-=======
 
   function debounce(fn, delay) {
   let timer = null;
@@ -903,37 +656,12 @@ document.addEventListener("visibilitychange", () => {
 const sendSpeedDebounced = debounce(sendSpeed, 150);
 
 
->>>>>>> head
   const speedSlider = $("speedSlider");
   if (speedSlider) {
     speedSlider.addEventListener("input", (e) => {
       speed = Number(e.target.value);
       const speedValue = $("speedValue");
       if (speedValue) speedValue.textContent = `${speed}%`;
-<<<<<<< HEAD
-    });
-  }
-
-  // -- emergency stop --
-  const estopBtn = $("estopBtn");
-  if (estopBtn) {
-    estopBtn.addEventListener("click", () => {
-      stopDrive();
-      sendCommand("estop");
-      log("EMERGENCY STOP COMMAND SENT.", "error");
-    });
-  }
-
-  // -- movement buttons (the ONLY movement-control system) --
-  // bindHoldButton("forwardBtn", "forward");
-  // bindHoldButton("reverseBtn", "reverse");
-  // bindHoldButton("leftBtn", "left");
-  // bindHoldButton("rightBtn", "right");
-
-  const stopBtn = $("stopBtn");
-  if (stopBtn) {
-    stopBtn.addEventListener("click", stopDrive);
-=======
       sendSpeedDebounced(speed);
     });
   }
@@ -980,7 +708,6 @@ const sendSpeedDebounced = debounce(sendSpeed, 150);
   const stopBtn = $("stopBtn");
   if (stopBtn) {
     stopBtn.addEventListener("click", () => sendDirection("stop", null));
->>>>>>> head
   }
 
   // -- camera / thermal --
